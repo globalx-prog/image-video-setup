@@ -196,3 +196,4 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 | **Ollama VRAM leeren** | `systemctl restart ollama` |
 | **Freien Festplattenspeicher prüfen** | `df -h /home` |
 | **Modelle auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/checkpoints/` |
+
