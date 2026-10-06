@@ -63,6 +63,13 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
   * **Text Encoder:** `models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors` (6.7 GB)
   * **Video VAE:** `models/vae/wan_2.1_vae.safetensors` (254 MB)
   * *Eigenschaft:* Höchste physikalische Bewegungskonsistenz und Detailtiefe. Nutzt deine 48 GB VRAM voll aus.
+* **MiniMax-H3 (Hailuo 03) – Video- & Native Audio-Generierung (AMD ROCm / HIP Edition):**
+  * **Diffusion Core:** `models/diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors` (19.5 GB)
+  * **Text Encoder (AMD-nativ):** `models/text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors` (25.3 GB)
+  * **Video VAE:** `models/vae/minimax_h3_video_vae_int8_convrot.safetensors` (2.6 GB)
+  * **Audio VAE:** `models/vae/minimax_h3_audio_vae_fp32.safetensors` (580 MB)
+  * **Turbo LoRA (8-Steps):** `models/loras/minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors` (1.8 GB)
+  * *Wichtige AMD-Besonderheit:* Standard-Workflows verlinken oft auf NVIDIA-`nvfp4`. Auf AMD ROCm muss zwingend die `int8_convrot`-Variante gewählt werden (per Symlink und Workflow-Preset automatisch abgesichert).
 
 ---
 
@@ -95,6 +102,14 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
 3. **Videos mit Wan 2.1 (14B):**
    * ComfyUI unterstützt Wan 2.1 nativ über `Load Diffusion Model` (`wan2.1_t2v_14B_bf16`), `Load CLIP` (`umt5_xxl_fp8`) und `Load VAE` (`wan_2.1_vae`).
    * Die Ausgabe wird an den Node **`Video Combine`** (aus der installierten *VideoHelperSuite*) geleitet, der direkt ein `.mp4`-Video auf die Platte schreibt.
+4. **Videos & Audio mit MiniMax-H3 (AMD-Version):**
+   * In ComfyUI auf **"Workflows" ➔ `video_minimax_h3_i2v_amd.json`** (Image-to-Video) oder **`video_minimax_h3_t2v_amd.json`** (Text-to-Video) klicken.
+   * **Modell-Dropdowns prüfen:**
+     * `clip_name`: `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` *(nicht nvfp4!)*
+     * `vae_name`: `minimax_h3_video_vae_int8_convrot.safetensors`
+     * `audio_vae`: `minimax_h3_audio_vae_fp32.safetensors`
+     * `diffusion_model`: `minimax_h3_fl2va_pruned_int8_convrot.safetensors`
+   * Der Workflow erzeugt synchronisiertes Video inklusive Soundtrack/Audiotrack!
 
 ---
 
