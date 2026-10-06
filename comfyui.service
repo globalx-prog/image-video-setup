@@ -1,0 +1,15 @@
+[Unit]
+Description=ComfyUI (native, AMD ROCm) - startet nach Docker Desktop
+After=docker-desktop.service network-online.target
+# Wird automatisch mitgestartet, sobald Docker Desktop startet
+# und beim Beenden von Docker Desktop mit gestoppt.
+PartOf=docker-desktop.service
+
+[Service]
+Type=simple
+ExecStart=/home/clemi/Projekte/LLM/image-video-setup/start_comfyui.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=docker-desktop.service

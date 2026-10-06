@@ -1,0 +1,9 @@
+comfy_env/
+test_venv/
+comfy_data/
+ComfyUI/
+*.safetensors
+*.pth
+*.bin
+*.log
+__pycache__/
