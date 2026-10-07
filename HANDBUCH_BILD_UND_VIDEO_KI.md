@@ -13,6 +13,9 @@
   - [2. Installierte Modelle \& Empfohlene Einsatzbereiche](#2-installierte-modelle--empfohlene-einsatzbereiche)
     - [A. Standalone Checkpoints (`ComfyUI/models/checkpoints/`)](#a-standalone-checkpoints-comfyuimodelscheckpoints)
     - [B. High-End Video Diffusion (`ComfyUI/models/`)](#b-high-end-video-diffusion-comfyuimodels)
+    - [C. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)](#c--top-10-freie-video-modelle-textimage-to-video)
+    - [D. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)](#d--top-10-freie-bild-modelle-text-to-image)
+    - [E. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)](#e--erkenntnisse-aus-den-leaderboards-artificial-analysis--arenaai)
   - [3. Tägliche Nutzung: Schritt für Schritt](#3-tägliche-nutzung-schritt-für-schritt)
     - [A. Schnelle Bilder im Chat (Open WebUI)](#a-schnelle-bilder-im-chat-open-webui)
     - [B. Videos \& High-End Grafik (ComfyUI)](#b-videos--high-end-grafik-comfyui)
@@ -102,6 +105,54 @@ Gegen Wan 2.1 (14B) (das du bereits installiert hast):
 Gegen LTX-Video 2B (das du bereits installiert hast):
 - MiniMax-H3 ist qualitativ spürbar detaillierter und filmreifer als LTX-Video.
 - LTX-Video ist dafür 5-mal schneller und extrem leichtgewichtig.
+
+### C. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)
+
+| Rang | Modell | Entwickler | Größe / VRAM | Wichtigste Eigenschaften | Umsetzung / Eignung | Status Lokal |
+| :---: | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1** | **HunyuanVideo** | Tencent | ~24 GB (BF16) / ~14 GB (FP8) | Höchster Open-Source Elo; filmreife Kameraführung & Gesichtsdetails. | ComfyUI (HunyuanWrapper) | Möglich (Download) |
+| **2** | **Wan 2.1 (T2V/I2V)** | Alibaba | ~14 GB (14B) / ~3.2 GB (1.3B) | State-of-the-Art Physik, extrem komplexe Bewegungsabläufe. | ComfyUI Custom Node | **Bereit ✅ (14B BF16)** |
+| **3** | **LTX-Video 2B** | Lightricks | ~5.4 GB | Ultraschneller DiT, 24fps Text-to-Video und Image-to-Video. | ComfyUI Checkpoint | **Bereit ✅** |
+| **4** | **Mochi 1** | Genmo | ~38 GB (BF16) / ~19 GB (FP8) | Sehr flüssige 30fps Bewegungen, profitiert maximal von 48 GB VRAM. | ComfyUI MochiWrapper | Möglich (Download) |
+| **5** | **CogVideoX-5B** | THUDM | ~10 GB | Cineastischer Look, starke Tiefenwirkung und Dynamik. | ComfyUI CogVideo-Node | Möglich (Download) |
+| **6** | **Stable Video Diffusion XT** | Stability AI | ~9.0 GB | Der etablierte Standard für 25-Frame Image-to-Video Animationen. | ComfyUI Checkpoint | **Bereit ✅** |
+| **7** | **CogVideoX-2B** | THUDM | ~4.5 GB | Leichtgewichtig, ideal für schnelles Prototyping von Videoclips. | ComfyUI CogVideo-Node | Möglich (Download) |
+| **8** | **AnimateDiff (SDXL)** | Guoyww et al. | ~3 GB (Motion Modul) | Verwandelt jedes SDXL-Bildmodell in flüssige Kurzvideos via LoRAs. | ComfyUI VideoHelperSuite | Möglich (Download) |
+| **9** | **ConsistI2V** | PKU / Tsinghua | ~8 GB | Spezialisiert auf extreme Bildkonsistenz von Start- bis Endframe. | ComfyUI / Python | Möglich (Download) |
+| **10** | **DynamiCrafter** | CUHK / Tencent | ~7 GB | Starke Image-to-Video Animationen mit steuerbarer Kameradynamik. | ComfyUI DynamiCrafter | Möglich (Download) |
+| *Top* | **MiniMax-H3 (Hailuo 03)** | MiniMax | ~19.5 GB (int8_convrot) | State-of-the-Art Video mit nativer Sound-/Audio-Generierung. | ComfyUI Diffusers/HIP | **Bereit ✅** |
+
+### D. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)
+
+| Rang | Modell | Entwickler | Größe / Format | Wichtigste Eigenschaften | Umsetzung / Eignung | Status Lokal |
+| :---: | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1** | **FLUX.1 [dev]** | Black Forest Labs | ~23 GB (BF16) / ~17 GB (FP8) | Höchster Open-Source Elo, fotorealistische Haut, perfekte Textdarstellung. | ComfyUI Checkpoint | **Bereit ✅ (FP8)** |
+| **2** | **FLUX.1 [schnell]** | Black Forest Labs | ~17 GB (FP8) | Extrem schnell (nur 4 Steps), fast identische Qualität wie [dev]. | ComfyUI / Open WebUI | **Bereit ✅** |
+| **3** | **SD 3.5 Large** | Stability AI | ~16 GB (FP16) / ~15 GB (FP8) | 8B Parameter, starke typografische Fähigkeiten, flexibler Stil. | ComfyUI Checkpoint | **Bereit ✅ (FP8)** |
+| **4** | **SD 3.5 Medium** | Stability AI | ~5 GB (FP16) | Ausbalanciert für schnelle Generierungen bei gutem Prompt-Verständnis. | ComfyUI Checkpoint | Möglich (Download) |
+| **5** | **SDXL Base 1.0** | Stability AI | ~6.5 GB (FP16) | Riesiges Ökosystem, tausende Community-Finetunes & LoRAs. | ComfyUI / Open WebUI | **Bereit ✅** |
+| **6** | **Pony Diffusion V6 XL** | Community (Astrite) | ~6.5 GB | Unübertroffen für Comic, Anime, Styling und anatomische Genauigkeit. | ComfyUI Checkpoint | Möglich (Download) |
+| **7** | **Juggernaut XL (v9/v10)** | RunDiffusion | ~6.5 GB | Bester SDXL-Finetune für cineastische Fotos & Landschaftsfotografie. | ComfyUI Checkpoint | Möglich (Download) |
+| **8** | **Kolors** | Kuaishou | ~14 GB | Starke Textverständnis-Engine (GLM-basiert), zweisprachig (EN/ZH). | ComfyUI / Diffusers | Möglich (Download) |
+| **9** | **SDXL Turbo** | Stability AI | ~6.5 GB | 1-Step Echtzeit-Bildgenerierung für Live-Workflows. | ComfyUI Checkpoint | Möglich (Download) |
+| **10** | **PixArt-Sigma** | PixArt Alpha | ~3.5 GB | Sehr kompakt, 4K-fähig, exzellente Schärfe bei geringem Speicherbedarf. | ComfyUI Checkpoint | Möglich (Download) |
+
+### E. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)
+
+#### Text-to-Image:
+* **Proprietäre Spitzenreiter:** Recraft V3, Midjourney v6.1 und DALL-E 3 führen die Elo-Rankings bei reinen Cloud-Diensten an.
+* **Beste freie / Open-Weights Modelle:** **FLUX.1 [dev]** und **FLUX.1 [schnell]** (Black Forest Labs) dominieren das Open-Weights-Ranking unangefochten mit dem höchsten Elo-Score aller freien Modelle. Dahinter folgen Stable Diffusion 3.5 Large und SDXL Turbo/Base.
+* **Gibt es noch bessere als FLUX?** Unter den freien Modellen **nein** – FLUX.1 ist aktuell die absolute Referenz für Prompt-Treue und Typografie.
+
+#### Text-to-Video / Image-to-Video:
+* **Proprietäre Spitzenreiter:** Runway Gen-3 Alpha, Kling 1.5, Luma Dream Machine und Sora.
+* **Beste freie / Open-Weights Modelle:**
+  * **HunyuanVideo (Tencent):** Führt das Open-Source-Ranking für fotorealistische Gesichter und lange, konsistente Clips an.
+  * **Wan 2.1 (Alibaba):** Hervorragende physikalische Bewegung und Konsistenz (*lokal mit 14B BF16 installiert*).
+  * **MiniMax-H3 (Hailuo 03):** Eines der stärksten Modelle weltweit mit nativer Audio-Generierung (*lokal installiert*).
+  * **LTX-Video (Lightricks):** Schnellster Diffusion-Transformer für Echtzeit-nahe Videoclips (*lokal installiert*).
+  * **Mochi 1 (Genmo):** Exzellente, flüssige Animationen (benötigt extrem viel VRAM – perfekt für 48 GB).
+  * **SVD-XT (Stability AI):** Der robuste Klassiker für Image-to-Video (*lokal installiert*).
 
 ---
 

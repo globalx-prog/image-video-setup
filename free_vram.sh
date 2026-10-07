@@ -43,3 +43,4 @@ else
     echo "rocm-smi nicht gefunden."
 fi
 echo "Fertig! Die GPU ist sauber für die nächste Generierung."
+

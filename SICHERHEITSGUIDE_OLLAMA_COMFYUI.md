@@ -153,3 +153,4 @@ Im Ordner `image-video-setup/` liegt das neue Skript [`free_vram.sh`](file:///ho
 ### 💡 Faustregel für jeden Tag:
 > **Willst du ein Video rendern (Wan oder MiniMax)?**  
 > Einmal kurz `./free_vram.sh` ausführen – danach rendert das Video mit Vollgas und ohne jedes Risiko eines Freezes!
+
