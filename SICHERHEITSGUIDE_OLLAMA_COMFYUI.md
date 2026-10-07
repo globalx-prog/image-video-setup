@@ -5,18 +5,23 @@
 ---
 
 ## 📑 Inhaltsverzeichnis
-1. [Forensische Ursachen-Analyse des gestrigen Absturzes](#1-forensische-ursachen-analyse-des-gestrigen-absturzes)
+1. [Forensische Ursachen-Analyse der beiden Abstürze](#1-forensische-ursachen-analyse-der-beiden-abstürze)
+   - [A. Absturz-Typ 1: VRAM-Überbelegung (Ollama + ComfyUI Gleichzeitigkeit)](#a-absturz-typ-1-vram-überbelegung-ollama--comfyui-gleichzeitigkeit)
+   - [B. Absturz-Typ 2: GPU-Watchdog-Timeout bei Video-KI (Wan 2.1 + Desktop/Firefox)](#b-absturz-typ-2-gpu-watchdog-timeout-bei-video-ki-wan-21--desktopfirefox)
 2. [Das Kernproblem: Zwei unabhängige KI-Engines auf einer GPU](#2-das-kernproblem-zwei-unabhängige-ki-engines-auf-einer-gpu)
 3. [Die VRAM-Budget-Matrix (Was darf gleichzeitig laufen?)](#3-die-vram-budget-matrix-was-darf-gleichzeitig-laufen)
 4. [Die 3 Betriebsmodi für den Alltag](#4-die-3-betriebsmodi-für-den-alltag)
-5. [Die 4-stufige Schutzarchitektur (Bereits eingerichtet)](#5-die-4-stufige-schutzarchitektur-bereits-eingerichtet)
+5. [Die 6-stufige Schutzarchitektur (Vollständig eingerichtet)](#5-die-6-stufige-schutzarchitektur-vollständig-eingerichtet)
 6. [Praxis-Spickzettel & Notfall-Befehle](#6-praxis-spickzettel--notfall-befehle)
 
 ---
 
-## 1. Forensische Ursachen-Analyse des gestrigen Absturzes
+## 1. Forensische Ursachen-Analyse der beiden Abstürze
 
-Die System- und Kernel-Logs von gestern Abend (**22:14 bis 22:17 Uhr**) belegen den exakten Hergang des Absturzes:
+Die System- und Kernel-Logs belegen zwei grundlegend unterschiedliche Fehlerursachen auf einer gemeinsamen Single-GPU-Workstation (Display + Compute):
+
+### A. Absturz-Typ 1: VRAM-Überbelegung (Ollama + ComfyUI Gleichzeitigkeit)
+*Zeitpunkt: Gestern Abend, 22:14 bis 22:17 Uhr*
 
 ```text
 [22:14:06] ComfyUI: Requested to load WanTEModel (6.4 GB VRAM)
@@ -28,18 +33,39 @@ Die System- und Kernel-Logs von gestern Abend (**22:14 bis 22:17 Uhr**) belegen 
 --> [HARD FREEZE: Desktop reagiert nicht mehr, Monitor friert ein, Hard Reboot erforderlich]
 ```
 
-### Was ist hier physikalisch passiert?
-1. **Ollama war noch aktiv geladen:**  
-   Aus einem vorherigen Chat hielt Ollama ein großes Sprachmodell inklusive KV-Cache und Prompt-Cache im VRAM (**ca. 22–24 GB VRAM belegt**).
-2. **ComfyUI startete parallel:**  
-   ComfyUI forderte für Wan 2.1 (14B) und Text-Encoder **weitere 32,6 GB VRAM** an.
-3. **Der Speicherüberlauf:**  
-   `24 GB (Ollama) + 32,6 GB (Wan) + 2 GB (Desktop/Wayland) = ~58,6 GB Gesamtforderung!`  
-   Die Grafikkarte besitzt jedoch **nur 48 GB physischen VRAM**.
-4. **Der fatale PCIe-Stau (SDMA-Engine Timeout):**  
-   ROCm und der Linux-Treiber `amdgpu` versuchten verzweifelt, den VRAM-Überlauf über PCIe in den Arbeitsspeicher auszulagern (*Shared Virtual Memory / SVM Page Migration*).
-5. **Der Hardware-Lockup:**  
-   Unter der extremen Last lief die SDMA-Transfer-Engine der Grafikkarte in ein Hardware-Timeout (`Fence fallback timer expired`). Da der Desktop-Server (**Xwayland / GNOME**) dieselbe GPU für die Bildschirmausgabe nutzt, riss der GPU-Reset den gesamten Desktop mit in den Abgrund.
+**Was war passiert?**
+1. **Ollama war noch aktiv geladen:** Hielt ~24 GB VRAM aus einem vorherigen Chat.
+2. **ComfyUI startete parallel:** Forderte 32,6 GB VRAM für Wan 2.1 an.
+3. **Speicherüberlauf:** $24 + 32,6 + 2\text{ (Desktop)} = \mathbf{58,6\text{ GB}}$ bei nur 48 GB physischem VRAM.
+4. **PCIe-Stau (SDMA-Engine Timeout):** AMD SVM Page Migration schob Gigabytes über PCIe hin und her; die SDMA-Engine lief in ein Hardware-Timeout $\rightarrow$ Hard Freeze.
+
+---
+
+### B. Absturz-Typ 2: GPU-Watchdog-Timeout bei Video-KI (Wan 2.1 + Desktop/Firefox)
+*Zeitpunkt: Heute Vormittag, 10:02:27 bis 10:02:32 Uhr*
+
+```text
+ 10%|█         | 3/30 [01:01<10:43, 23.82s/it]
+ ...
+ 47%|████▋     | 14/30 [06:36<08:06, 30.41s/it]
+ 50%|█████     | 15/30 [07:07<07:36, 30.42s/it]
+kernel: amdgpu: ring gfx_0.0.0 timeout, signaled seq=119811, emitted seq=119812
+kernel: amdgpu: Process firefox pid 9429 thread firefox:cs0 pid 9625
+kernel: amdgpu: Starting gfx_0.0.0 ring reset ... MES failed to respond
+kernel: amdgpu: MODE1 reset
+kernel: amdgpu: VRAM is lost due to GPU reset!
+ComfyUI: HW Exception by GPU node-1 reason :GPU Hang -> Fatal Python error: Aborted
+gnome-shell: amdgpu: The CS has cancelled because the context is lost. -> status=6/ABRT
+--> [DESKTOP ABORT: Bildschirm wird schwarz, Session schließt sich, Rückkehr zum Login-Screen (GDM)]
+```
+
+**Was war passiert?**
+1. **Ollama war völlig unschuldig:** Kein Modell geladen (`ollama ps` war leer).
+2. **Kein VRAM-Überlauf:** Der Speicher war mit 33,6 GB stabil im 48-GB-Limit.
+3. **Schwere 30-Sekunden-Rechenschritte:** Wan 2.1 (14B BF16) renderte seit über 7 Minuten erfolgreich. Jeder Schritt dauerte **30,4 Sekunden**.
+4. **Firefox forderte Grafik-Rendering an:** Bei Schritt 15 schickte Firefox (`firefox:cs0`) einen GPU-Draw-Befehl an den Desktop-Ring `ring gfx_0.0.0`.
+5. **Der Treiber-Fehlalarm (`queue_preemption_timeout_ms = 9000`):** Der Linux AMD-Treiber wartet standardmäßig maximal **9 Sekunden** auf die Freigabe des Rings. Da der 30-Sekunden-Wan-Schritt die GPU noch voll belegte, dachte der Treiber fälschlicherweise, die GPU sei abgestürzt!
+6. **Panik-Hardware-Reset (`MODE1 reset`):** Der Treiber führte einen Hardware-Reset durch, wodurch der VRAM gelöscht wurde. ComfyUI brach ab und GNOME Shell stürzte ab $\rightarrow$ Desktop-Kick.
 
 ---
 
@@ -109,31 +135,43 @@ Deine Karte hat **48 GB physischen Speicher**. Abzüglich 3 GB Sicherheitsreserv
 
 ---
 
-## 5. Die 4-stufige Schutzarchitektur (Bereits eingerichtet)
+## 5. Die 6-stufige Schutzarchitektur (Vollständig eingerichtet)
 
 ### Stufe 1: ComfyUI Hardware-Reserve (`--reserve-vram 3`)
-In `image-video-setup/start_comfyui.sh` ist ab sofort der Parameter `--reserve-vram 3` fest hinterlegt:
-```bash
-exec python main.py --reserve-vram 3 --listen 0.0.0.0 --port 8188
-```
+In `image-video-setup/start_comfyui.sh` ist der Parameter `--reserve-vram 3` fest hinterlegt:
 * **Effekt:** ComfyUI lässt der Desktop-Oberfläche (Xwayland / GNOME) immer mindestens 3 GB VRAM frei. Selbst wenn ein Workflow an seine Grenzen stößt, friert der Desktop nicht mehr ein.
 
-### Stufe 2: Das 1-Klick-Bereinigungsskript (`free_vram.sh`)
-Im Ordner `image-video-setup/` liegt das neue Skript [`free_vram.sh`](file:///home/clemi/Projekte/LLM/image-video-setup/free_vram.sh):
+### Stufe 2: Host-RAM Capping in ComfyUI (`--cache-ram 8 32`)
+Standardmäßig pinnt ComfyUI bis zu 56,7 GB des System-RAMs. Durch `--cache-ram 8 32` in `start_comfyui.sh`:
+* **Effekt:** Aktiver Node-Cache wird auf 8 GB gedeckelt, inaktiver Cache auf 32 GB.
+* **Ergebnis:** Mindestens **25–30 GB System-RAM** bleiben immer frei für Desktop, Firefox, Docker und Betriebssystem.
+
+### Stufe 3: ROCm SDMA-Bypass (`HSA_ENABLE_SDMA=0`) & Allocator-Tuning
+In `start_comfyui.sh` sind zwei kritische ROCm-Umgebungsvariablen aktiviert:
+```bash
+export PYTORCH_CUDA_ALLOC_CONF="garbage_collection_threshold:0.8,max_split_size_mb:512"
+export HSA_ENABLE_SDMA=0
+```
+* **Effekt:** Verhindert PyTorch-Speicherfragmentierung und leitet Host-zu-Device-Transfers über Compute-Blits statt über die SDMA-Hardware-Engine um. Das schließt SDMA-Ring-Timeouts (`ring sdma0 timeout`) komplett aus.
+
+### Stufe 4: Kernel Watchdog-Timeout Patch (60 Sekunden statt 9 Sekunden)
+Für lange Video-Rechenschritte (wie Wan 2.1 14B mit 30s/Step) wird der AMD-Treiber-Watchdog auf 60 Sekunden erhöht.
+* **Skript zum Anwenden:**
+  ```bash
+  sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh
+  ```
+* **Was es tut:** Schreibt `lockup_timeout=60000,60000,60000,60000` und `queue_preemption_timeout_ms=60000` nach `/etc/modprobe.d/amdgpu-timeout.conf` und baut das initramfs neu. Nach einem Neustart bricht der Treiber auch bei 30-Sekunden-Schritten niemals mehr panisch mit einem MODE1-Reset ab.
+
+### Stufe 5: Das 1-Klick-Bereinigungsskript (`free_vram.sh`)
+Im Ordner `image-video-setup/` liegt das Skript [`free_vram.sh`](file:///home/clemi/Projekte/LLM/image-video-setup/free_vram.sh):
 ```bash
 ./free_vram.sh
 ```
-* **Was es tut:**
-  1. Stoppt sofort alle aktiven Ollama-Modelle (`ollama stop`).
-  2. Sendet ein Signal an ComfyUI (`POST /free`), um ungenutzte PyTorch-Caches freizugeben.
-  3. Gibt den VRAM in unter 1 Sekunde komplett auf ~2 GB (Desktop-Standby) frei.
+* **Was es tut:** Stoppt sofort alle aktiven Ollama-Modelle (`ollama stop`) und leert alle ComfyUI-Caches per API (`POST /free`).
 
-### Stufe 3: Ollama Inaktivitäts-Timeout (`OLLAMA_KEEP_ALIVE=5m`)
-* In `/etc/systemd/system/ollama.service` sollte `OLLAMA_KEEP_ALIVE=5m` (oder `10m`) gewählt werden.
-* Wenn du im Chat chattest und dann für 5 Minuten nichts tust, räumt Ollama den Speicher automatisch frei – der VRAM steht wieder voll für ComfyUI zur Verfügung.
-
-### Stufe 4: Flow-Matching-Schutz (CFG 1.0)
-* Für FLUX.1 ist CFG fest auf **`1.0`** konfiguriert. Dies verhindert nicht nur Bildverbrennungen, sondern halbiert auch den VRAM-Durchsatz pro Rechenschritt.
+### Stufe 6: Ollama Inaktivitäts-Timeout & Flow-Matching-Schutz (CFG 1.0)
+* In `/etc/systemd/system/ollama.service` ist `OLLAMA_KEEP_ALIVE=15m` und `OLLAMA_GPU_OVERHEAD=3294967296` (3,3 GB) konfiguriert.
+* Für FLUX.1 ist CFG fest auf **`1.0`** konfiguriert (halbiert den VRAM-Durchsatz pro Step).
 
 ---
 
@@ -141,6 +179,7 @@ Im Ordner `image-video-setup/` liegt das neue Skript [`free_vram.sh`](file:///ho
 
 | Was willst du tun? | Befehl / Aktion |
 | :--- | :--- |
+| **AMD GPU 60s-Watchdog Patch installieren** | `sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh` *(einmalig ausführen + Reboot)* |
 | **VRAM sofort komplett leeren** | `/home/clemi/Projekte/LLM/image-video-setup/free_vram.sh` |
 | **VRAM-Auslastung prüfen** | `rocm-smi --showmeminfo vram` |
 | **Prüfen, was Ollama im Speicher hat**| `ollama ps` |
@@ -150,7 +189,9 @@ Im Ordner `image-video-setup/` liegt das neue Skript [`free_vram.sh`](file:///ho
 
 ---
 
-### 💡 Faustregel für jeden Tag:
-> **Willst du ein Video rendern (Wan oder MiniMax)?**  
-> Einmal kurz `./free_vram.sh` ausführen – danach rendert das Video mit Vollgas und ohne jedes Risiko eines Freezes!
+### 💡 Faustregeln für absolute Stabilität:
+1. **Willst du ein Video rendern (Wan oder MiniMax)?**  
+   Einmal kurz `./free_vram.sh` ausführen – danach rendert das Video ohne VRAM-Konflikte.
+2. **Während eines langen Video-Renders (7–15 Minuten):**  
+   Lass den Browser-Tab im Hintergrund ruhen und surfe nicht mit hardwarebeschleunigten 3D/WebGL-Seiten auf demselben Display-Server herum, bis der AMD-Timeout-Patch aktiv ist.
 

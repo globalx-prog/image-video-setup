@@ -26,6 +26,7 @@
     - [C. Der "Size mismatch for shared.weight"-Fehler beim CLIPLoader](#c-der-size-mismatch-for-sharedweight-fehler-beim-cliploader)
     - [D. Der "not enough values to unpack (expected 5, got 3)" Fehler](#d-der-not-enough-values-to-unpack-expected-5-got-3-fehler)
     - [E. AMD ROCm vs. NVIDIA nvfp4 (Warum int8\_convrot nötig ist)](#e-amd-rocm-vs-nvidia-nvfp4-warum-int8_convrot-nötig-ist)
+    - [F. Der "GPU Hang" \& Desktop-Reset bei langen Video-Renders (amdgpu Watchdog-Timeout)](#f-der-gpu-hang--desktop-reset-bei-langen-video-renders-amdgpu-watchdog-timeout)
   - [5. Modelle finden, testen \& neue Funktionen nachrüsten](#5-modelle-finden-testen--neue-funktionen-nachrüsten)
     - [A. Der ComfyUI-Manager (Der interne "App Store")](#a-der-comfyui-manager-der-interne-app-store)
     - [B. Manuell heruntergeladene Modelle ablegen](#b-manuell-heruntergeladene-modelle-ablegen)
@@ -260,6 +261,22 @@ ComfyUI wirkt wie ein unübersichtlicher Kabelsalat. **Du musst diese Kabel im A
     * Diffusion-Core: `minimax_h3_fl2va_pruned_int8_convrot.safetensors`
   * **Absicherung per Symlink:** Ein Symlink `models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors -> qwen3vl_32b_minimax_h3_int8_convrot.safetensors` leitet auch unbedarft importierte Community-Workflows automatisch auf den AMD-Kern um.
 
+### F. Der "GPU Hang" & Desktop-Reset bei langen Video-Renders (amdgpu Watchdog-Timeout)
+* **Symptom:** Ein Video-Workflow (z. B. Wan 2.1 14B) rendert viele Minuten völlig normal (z. B. bis Schritt 15/30). Plötzlich wird der Bildschirm schwarz, ComfyUI bricht mit `HW Exception: GPU Hang` ab und der Benutzer wird auf den Ubuntu-Anmeldebildschirm (GDM) zurückgeworfen.
+* **Ursache:** 
+  1. Deine AMD Radeon PRO W7800 ist die **einzige GPU im System** und berechnet gleichzeitig das KI-Video und den Wayland-Desktop.
+  2. Wan 2.1 (14B BF16) benötigt ca. **30 Sekunden pro Rechenschritt**.
+  3. Wenn währenddessen der Webbrowser (Firefox) Bildschirminhalte rendert, versucht er Grafikbefehle auf `ring gfx_0.0.0` auszuführen.
+  4. Der Standard-Watchdog des Linux AMD-Treibers (`queue_preemption_timeout_ms = 9000`) wartet jedoch nur **9 Sekunden**. Da der 30s-Schritt die GPU noch voll beansprucht, vermutet der Treiber fälschlicherweise einen Hardware-Freeze und löst einen panischen `MODE1 GPU-Reset` aus.
+* **Dauerhafte Lösung:**
+  1. **AMD-Treiber-Timeout auf 60s erhöhen:**
+     ```bash
+     sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh
+     ```
+     *(Setzt `lockup_timeout` und `queue_preemption_timeout_ms` auf 60.000 ms in `/etc/modprobe.d/amdgpu-timeout.conf` und baut das initramfs neu. Nach Reboot aktiv.)*
+  2. **ComfyUI RAM- & SDMA-Optimierungen:** In [`start_comfyui.sh`](file:///home/clemi/Projekte/LLM/image-video-setup/start_comfyui.sh) sind `HSA_ENABLE_SDMA=0` (verhindert PCIe-SDMA-Hangs) sowie `--cache-ram 8 32` (schützt vor Host-RAM-Erschöpfung) fest hinterlegt.
+  3. **Browser während 10-Minuten-Renders schonen:** Hardwarebeschleunigung in Firefox bei Bedarf drosseln oder den ComfyUI-Tab nicht im Vordergrund animieren lassen.
+
 ---
 
 ## 5. Modelle finden, testen & neue Funktionen nachrüsten
@@ -343,6 +360,8 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 | **Checkpoints auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/checkpoints/` |
 | **Diffusionsmodelle auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/diffusion_models/` |
 | **Fertige Workflows auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/user/default/workflows/` |
+| **VRAM sofort komplett leeren (1-Klick)** | `/home/clemi/Projekte/LLM/image-video-setup/free_vram.sh` |
+| **AMD GPU 60s-Watchdog Patch** | `sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh` |
 | **MiniMax-H3 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_minimax_h3.sh` |
 | **Wan 2.1 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_wan.sh` |
 
