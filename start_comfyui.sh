@@ -4,4 +4,4 @@
 cd "$(dirname "$0")"
 source comfy_env/bin/activate
 cd ComfyUI
-exec python main.py --listen 0.0.0.0 --port 8188
+exec python main.py --reserve-vram 3 --listen 0.0.0.0 --port 8188

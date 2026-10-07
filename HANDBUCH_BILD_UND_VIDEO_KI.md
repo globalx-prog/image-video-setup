@@ -6,22 +6,29 @@
 ---
 
 ## 📑 Inhaltsverzeichnis
-1. [Architektur & System-Überblick](#1-architektur--system-überblick)
-2. [Installierte Modelle & Empfohlene Einsatzbereiche](#2-installierte-modelle--empfohlene-einsatzbereiche)
-3. [Tägliche Nutzung: Schritt für Schritt](#3-tägliche-nutzung-schritt-für-schritt)
-   - [A. Schnelle Bilder im Chat (Open WebUI)](#a-schnelle-bilder-im-chat-open-webui)
-   - [B. Videos & High-End Grafik (ComfyUI)](#b-videos--high-end-grafik-comfyui)
-   - [C. ComfyUI ohne Frust verstehen ("Drag & Drop"-Magie)](#c-comfyui-ohne-frust-verstehen-drag--drop-magie)
-4. [Fehlerbehebung & Praxiserkenntnisse](#4-fehlerbehebung--praxiserkenntnisse)
-   - [A. Der "Error 400 (Bad Request)" in Open WebUI](#a-der-error-400-bad-request-in-open-webui)
-   - [B. Das "Overcooking"-Problem: Warum FLUX.1 zwingend CFG 1.0 braucht](#b-das-overcooking-problem-warum-flux1-zwingend-cfg-10-braucht)
-   - [C. Der "Size mismatch for shared.weight"-Fehler beim CLIPLoader](#c-der-size-mismatch-for-sharedweight-fehler-beim-cliploader)
-   - [D. Der "not enough values to unpack (expected 5, got 3)" Fehler](#d-der-not-enough-values-to-unpack-expected-5-got-3-fehler)
-   - [E. AMD ROCm vs. NVIDIA nvfp4 (Warum int8_convrot nötig ist)](#e-amd-rocm-vs-nvidia-nvfp4-warum-int8_convrot-nötig-ist)
-5. [Modelle finden, testen & neue Funktionen nachrüsten](#5-modelle-finden-testen--neue-funktionen-nachrüsten)
-6. [VRAM-Sicherheit & Stabilitätsschutz (Freeze-Prävention)](#6-vram-sicherheit--stabilitätsschutz-freeze-prävention)
-7. [Roadmap: Offene TODOs & Optimierungen](#7-roadmap-offene-todos--optimierungen)
-8. [Spickzettel: Wichtige Terminal-Befehle](#8-spickzettel-wichtige-terminal-befehle)
+- [🎨 Das Kompletthandbuch: Lokales Bild- \& Video-KI Setup](#-das-kompletthandbuch-lokales-bild---video-ki-setup)
+  - [📑 Inhaltsverzeichnis](#-inhaltsverzeichnis)
+  - [1. Architektur \& System-Überblick](#1-architektur--system-überblick)
+    - [Warum läuft ComfyUI nativ und nicht im Docker?](#warum-läuft-comfyui-nativ-und-nicht-im-docker)
+  - [2. Installierte Modelle \& Empfohlene Einsatzbereiche](#2-installierte-modelle--empfohlene-einsatzbereiche)
+    - [A. Standalone Checkpoints (`ComfyUI/models/checkpoints/`)](#a-standalone-checkpoints-comfyuimodelscheckpoints)
+    - [B. High-End Video Diffusion (`ComfyUI/models/`)](#b-high-end-video-diffusion-comfyuimodels)
+  - [3. Tägliche Nutzung: Schritt für Schritt](#3-tägliche-nutzung-schritt-für-schritt)
+    - [A. Schnelle Bilder im Chat (Open WebUI)](#a-schnelle-bilder-im-chat-open-webui)
+    - [B. Videos \& High-End Grafik (ComfyUI)](#b-videos--high-end-grafik-comfyui)
+    - [C. ComfyUI ohne Frust verstehen ("Drag \& Drop"-Magie)](#c-comfyui-ohne-frust-verstehen-drag--drop-magie)
+  - [4. Fehlerbehebung \& Praxiserkenntnisse](#4-fehlerbehebung--praxiserkenntnisse)
+    - [A. Der "Error 400 (Bad Request)" in Open WebUI](#a-der-error-400-bad-request-in-open-webui)
+    - [B. Das "Overcooking"-Problem: Warum FLUX.1 zwingend CFG 1.0 braucht](#b-das-overcooking-problem-warum-flux1-zwingend-cfg-10-braucht)
+    - [C. Der "Size mismatch for shared.weight"-Fehler beim CLIPLoader](#c-der-size-mismatch-for-sharedweight-fehler-beim-cliploader)
+    - [D. Der "not enough values to unpack (expected 5, got 3)" Fehler](#d-der-not-enough-values-to-unpack-expected-5-got-3-fehler)
+    - [E. AMD ROCm vs. NVIDIA nvfp4 (Warum int8\_convrot nötig ist)](#e-amd-rocm-vs-nvidia-nvfp4-warum-int8_convrot-nötig-ist)
+  - [5. Modelle finden, testen \& neue Funktionen nachrüsten](#5-modelle-finden-testen--neue-funktionen-nachrüsten)
+    - [A. Der ComfyUI-Manager (Der interne "App Store")](#a-der-comfyui-manager-der-interne-app-store)
+    - [B. Manuell heruntergeladene Modelle ablegen](#b-manuell-heruntergeladene-modelle-ablegen)
+  - [6. VRAM-Sicherheit \& Stabilitätsschutz (Freeze-Prävention)](#6-vram-sicherheit--stabilitätsschutz-freeze-prävention)
+  - [7. Roadmap: Offene TODOs \& Optimierungen](#7-roadmap-offene-todos--optimierungen)
+  - [8. Spickzettel: Wichtige Terminal-Befehle](#8-spickzettel-wichtige-terminal-befehle)
 
 ---
 
@@ -78,6 +85,23 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
   * **Beispiel-Eingabebild:** `input/transparent_rgb_gaming_mouse.png` (1.3 MB)
   * **Fertige Workflows:** `user/default/workflows/video_minimax_h3_i2v_amd.json` & `video_minimax_h3_t2v_amd.json`
   * *Wichtige AMD-Besonderheit:* Standard-Workflows verlinken oft auf NVIDIA-`nvfp4`. Auf AMD ROCm muss zwingend die `int8_convrot`-Variante gewählt werden (per Symlink und Workflow-Preset automatisch abgesichert).
+
+Aufgaben unterscheiden:
+
+🔊 Die große Besonderheit von MiniMax-H3: Native Audio-Generierung
+
+- MiniMax-H3 erzeugt Video UND passenden Sound gleichzeitig (daher der Eintrag audio_vae). Wenn du Videos generieren willst, die direkt passende Geräusche, Sprache oder Hintergrund-Soundtracks haben, ist MiniMax-H3 eines der wenigen Modelle, die das nativ können.
+- Bei cineastischer Bewegung und allgemeiner Video-Qualität rangiert MiniMax in den Arena-Leaderboards ganz oben bei den Top-Modellen.
+
+⚖️ Der direkte Vergleich mit deinen Modellen:
+
+Gegen Wan 2.1 (14B) (das du bereits installiert hast):
+- Wan 2.1: Gewinnt bei reiner Bildqualität, Texttreue und physikalischer Konsistenz (Bewegung von Objekten, Kleidung, Flüssigkeiten). Wan 2.1 gilt aktuell in der Open-Source-Community als der Maßstab für visuelle Qualität. Wan erzeugt allerdings standardmäßig erst einmal nur Video ohne Audio.
+- MiniMax-H3: Hat den Vorteil, dass Audio direkt mitgerendert wird. Visuell sind Wan 2.1 und MiniMax-H3 auf Augenhöhe.
+
+Gegen LTX-Video 2B (das du bereits installiert hast):
+- MiniMax-H3 ist qualitativ spürbar detaillierter und filmreifer als LTX-Video.
+- LTX-Video ist dafür 5-mal schneller und extrem leichtgewichtig.
 
 ---
 
@@ -208,22 +232,28 @@ Falls du Dateien von Hugging Face oder Civitai manuell lädst, gehören sie in d
 
 ## 6. VRAM-Sicherheit & Stabilitätsschutz (Freeze-Prävention)
 
-Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. Dennoch ist Vorsicht geboten, wenn Sprachmodelle und Videomodelle gleichzeitig laufen:
+> 📖 **Ausführlicher Leitfaden:** Siehe das dedizierte Handbuch [**`SICHERHEITSGUIDE_OLLAMA_COMFYUI.md`**](file:///home/clemi/Projekte/LLM/image-video-setup/SICHERHEITSGUIDE_OLLAMA_COMFYUI.md).
 
-1. **Kein automatisches Entladen bei 24h Keep-Alive:**  
-   In `ollama.service` ist aktuell `OLLAMA_KEEP_ALIVE=24h` konfiguriert. Ein einmal geladenes großes LLM (z. B. 70B mit ~38 GB VRAM) bleibt dauerhaft im Speicher.
-2. **Kollision mit ComfyUI:**  
-   Wenn Ollama 38 GB belegt und du in ComfyUI das 28.5 GB schwere Wan 2.1 startest, kann ROCm den Speicher nicht allokieren. Es folgt ein `OutOfMemoryError`.
-3. **Die Lösung:**
-   * Vor großen Video-Renderings in ComfyUI den VRAM kurz freiräumen:
+Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. Dennoch ist Vorsicht geboten, wenn Sprachmodelle (Ollama) und Bild-/Videomodelle (ComfyUI) gleichzeitig laufen:
+
+### Das Kernproblem (Ursache für GPU-Freezes):
+1. **Ollama und ComfyUI wissen nichts voneinander:**  
+   Wenn Ollama ein 30–35 GB Modell im Speicher hält (`qwen3.8-35b`, `artemis-31b`, `qwen3-coder`) und parallel ComfyUI gestartet wird (FLUX: 18 GB / Wan: 35 GB), fordern beide zusammen **über 55 GB VRAM** an!
+2. **Die Folge auf AMD ROCm:**  
+   Der Kernel versucht, VRAM über PCIe in den RAM auszulagern (SVM Page-Migration). Die SDMA-Engine der GPU läuft in ein Hardware-Timeout (`Fence fallback timer expired on ring sdma0`), und der gesamte Desktop friert ein!
+
+### Die 3 Schutz-Regeln:
+1. **Chat & Bild parallel (Open WebUI):**  
+   * **Entweder** kompaktes LLM (`qwen3.8-27b-q4`, ~18 GB) + **FLUX.1 schnell** (18 GB) = **36 GB / 45 GB (100% sicher)**.
+   * **Oder** großes LLM (35B, ~35 GB) + **SDXL Base** (7,5 GB) = **42,5 GB / 45 GB (Sicher)**.
+2. **High-End Video (Wan 2.1 / MiniMax-H3):**  
+   * Diese Modelle brauchen **35 GB VRAM ganz für sich allein**!
+   * **Pflicht:** Vor dem Starten eines Video-Workflows den VRAM kurz freiräumen:
      ```bash
-     systemctl restart ollama
+     /home/clemi/Projekte/LLM/image-video-setup/free_vram.sh
      ```
-   * Dauerhafte Absicherung in `/etc/systemd/system/ollama.service`:
-     ```ini
-     Environment="OLLAMA_MAX_LOADED_MODELS=1"
-     Environment="OLLAMA_KEEP_ALIVE=15m"
-     ```
+3. **Automatischer Desktop-Schutzwall:**  
+   * In `start_comfyui.sh` ist `--reserve-vram 3` hinterlegt. ComfyUI lässt der Benutzeroberfläche (Wayland/Xwayland) immer mindestens 3 GB Puffer frei, um Systemabstürze zu verhindern.
 
 ---
 
@@ -236,14 +266,14 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 - [x] LTX-Video 2B & SVD-XT einrichten
 - [x] Wan 2.1 14B (BF16 Diffusion + Text Encoder + VAE) bereitstellen
 - [x] Fehler 400 Fallback-Symlink (`model.safetensors`) anlegen
-- [ ] **Open WebUI:** Im Admin-Panel `flux1-schnell-fp8.safetensors` oder `flux1-dev-fp8.safetensors` final als Modell speichern und Test-Generierung prüfen.
-- [ ] **Firewall:** Port 8188 mit UFW absichern (nur Localhost & Tailscale erlauben):
+- [x] **Open WebUI:** Im Admin-Panel `flux1-schnell-fp8.safetensors` oder `flux1-dev-fp8.safetensors` final als Modell speichern und Test-Generierung prüfen.
+- [x] **Firewall:** Port 8188 mit UFW absichern (nur Localhost & Tailscale erlauben):
   ```bash
   sudo ufw allow in on lo to any port 8188
   sudo ufw allow in on tailscale0 to any port 8188
   sudo ufw deny 8188
   ```
-- [ ] **Ollama Härtung:** `OLLAMA_MAX_LOADED_MODELS=1` und `OLLAMA_KEEP_ALIVE=15m` in `/etc/systemd/system/ollama.service` eintragen.
+- [x] **Ollama Härtung:** `OLLAMA_MAX_LOADED_MODELS=1` und `OLLAMA_KEEP_ALIVE=15m` in `/etc/systemd/system/ollama.service` eintragen.
 - [ ] **ComfyUI Plugins:** `ComfyUI-Impact-Pack` (Face Detailer) und `4x-UltraSharp` (Upscaler) über den Manager installieren.
 - [ ] **Zukunfts-Projekt:** Docker Desktop durch native Docker Engine (`docker-ce`) ersetzen, um den Linux-VM-Overhead vollständig zu beseitigen.
 
