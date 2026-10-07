@@ -13,6 +13,7 @@
 4. [Die 3 Betriebsmodi für den Alltag](#4-die-3-betriebsmodi-für-den-alltag)
 5. [Die 6-stufige Schutzarchitektur (Vollständig eingerichtet)](#5-die-6-stufige-schutzarchitektur-vollständig-eingerichtet)
 6. [Praxis-Spickzettel & Notfall-Befehle](#6-praxis-spickzettel--notfall-befehle)
+7. [Der 4-Stufen-Notfallplan: Was tun, wenn das System einfriert?](#7-der-4-stufen-notfallplan-was-tun-wenn-das-system-einfriert)
 
 ---
 
@@ -194,4 +195,77 @@ Im Ordner `image-video-setup/` liegt das Skript [`free_vram.sh`](file:///home/cl
    Einmal kurz `./free_vram.sh` ausführen – danach rendert das Video ohne VRAM-Konflikte.
 2. **Während eines langen Video-Renders (7–15 Minuten):**  
    Lass den Browser-Tab im Hintergrund ruhen und surfe nicht mit hardwarebeschleunigten 3D/WebGL-Seiten auf demselben Display-Server herum, bis der AMD-Timeout-Patch aktiv ist.
+
+---
+
+## 7. Der 4-Stufen-Notfallplan: Was tun, wenn das System einfriert?
+
+Wenn der Bildschirm stockt oder die Maus einfriert, **niemals sofort panisch den Netzstecker ziehen oder die Power-Taste 10 Sekunden lang drücken!**  
+Bei 90% aller GPU-Freezes läuft der Linux-Kernel im Hintergrund völlig normal weiter – lediglich die Bildschirmausgabe der GPU hängt.
+
+Gehe immer nach dieser 4-Stufen-Leiter vor (vom schonendsten zum härtesten Eingriff):
+
+### 🟢 Stufe 1: TTY-Terminal aufrufen (Tastatur reagiert noch)
+Wenn die grafische Oberfläche (Wayland/Desktop) eingefroren ist:
+1. Drücke auf der Tastatur: **`Strg` + `Alt` + `F3`** (oder `F4` / `F5`).
+2. Du verlässt die GUI und siehst eine Text-Konsole: Melde dich mit deinem Benutzernamen (`clemi`) und Passwort an.
+3. Beende den Übeltäter gezielt und schonend:
+   ```bash
+   # VRAM sofort leeren
+   /home/clemi/Projekte/LLM/image-video-setup/free_vram.sh
+
+   # ODER den Desktop-Server sauber neu starten
+   sudo systemctl restart gdm
+   ```
+4. Zurück zum Desktop gelangst du mit: **`Strg` + `Alt` + `F2`** (oder `F1`).
+
+---
+
+### 🟡 Stufe 2: SSH-Rettung übers Smartphone oder Zweitgerät (Das mächtigste Werkzeug!)
+Wenn Monitor, Maus und Tastatur am PC blockiert sind:
+1. Nimm dein Smartphone (z. B. mit der kostenlosen App *Termius*) oder einen Laptop zur Hand.
+2. Verbinde dich per SSH über dein Tailscale-Netzwerk:
+   ```bash
+   ssh clemi@100.102.224.36
+   ```
+3. Führe den VRAM-Cleaner aus oder starte den PC geordnet neu:
+   ```bash
+   /home/clemi/Projekte/LLM/image-video-setup/free_vram.sh
+   # Oder falls nötig:
+   sudo systemctl reboot
+   ```
+* **Vorteil:** Alle Schreib-Caches auf deinen NVMe-SSDs werden ordnungsgemäß synchronisiert. Null Datenverlust, keine Dateisystemfehler!
+
+---
+
+### 🟠 Stufe 3: Der magische Linux-Rettungsanker: REISUB (Magic SysRq)
+Wenn weder TTY noch Netzwerk reagieren, aber der Linux-Kernel noch Strom hat:
+
+Halte **`Alt` + `Druck` (Print Screen)** gedrückt und tippe mit jeweils **2 Sekunden Pause** nacheinander die Tasten:
+$$\mathbf{R} \;\longrightarrow\; \mathbf{E} \;\longrightarrow\; \mathbf{I} \;\longrightarrow\; \mathbf{S} \;\longrightarrow\; \mathbf{U} \;\longrightarrow\; \mathbf{B}$$
+
+*(Merksatz: **R**eboot **E**ven **I**f **S**ystem **U**tterly **B**roken)*
+
+| Buchstabe | Was der Linux-Kernel tut: | Warum es genial ist: |
+| :---: | :--- | :--- |
+| **R** *(unRaw)* | Entreißt dem abgestürzten Desktop die Tastaturkontrolle. | Reaktiviert Tastatureingaben. |
+| **E** *(tErm)* | Sendet `SIGTERM` an alle Prozesse. | Lässt Prozesse sauber schließen. |
+| **I** *(kIll)* | Sendet `SIGKILL` an verbliebene Hänger. | Räumt blockierte Prozesse ab. |
+| **S** *(Sync)* | **Schreibt alle RAM-Puffer auf die SSD.** | **Verhindert Datenverlust!** |
+| **U** *(Unmount)*| Hängt alle Dateisysteme "Nur-Lesen" (*Read-Only*) ein. | **Schützt SSD vor Korruption.** |
+| **B** *(reBoot)*| Führt einen sauberen Hardware-Reboot durch. | Startet den Rechner sicher neu. |
+
+> ⚙️ **Einmalige Aktivierung für volles REISUB in Ubuntu:**
+> Ubuntu schützt standardmäßig einige SysRq-Tasten. Um die volle REISUB-Funktion freizuschalten:
+> ```bash
+> echo "kernel.sysrq = 1" | sudo tee /etc/sysctl.d/99-sysrq.conf
+> sudo sysctl -p /etc/sysctl.d/99-sysrq.conf
+> ```
+
+---
+
+### 🔴 Stufe 4: Hard Power-Off (Der allerletzte Ausweg)
+Nur wenn Stufe 1, 2 und 3 nach mindestens 30 Sekunden Wartezeit keinerlei Reaktion zeigen:
+* Halte den Power-Knopf am PC-Gehäuse für **8 bis 10 Sekunden gedrückt**, bis der Strom abschaltet.
+* 10 Sekunden warten, dann wieder einschalten.
 
