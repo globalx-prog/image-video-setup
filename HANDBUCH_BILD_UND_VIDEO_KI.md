@@ -12,7 +12,12 @@
    - [A. Schnelle Bilder im Chat (Open WebUI)](#a-schnelle-bilder-im-chat-open-webui)
    - [B. Videos & High-End Grafik (ComfyUI)](#b-videos--high-end-grafik-comfyui)
    - [C. ComfyUI ohne Frust verstehen ("Drag & Drop"-Magie)](#c-comfyui-ohne-frust-verstehen-drag--drop-magie)
-4. [Fehlerbehebung & Praxiserkenntnisse (z. B. Error 400)](#4-fehlerbehebung--praxiserkenntnisse-z-b-error-400)
+4. [Fehlerbehebung & Praxiserkenntnisse](#4-fehlerbehebung--praxiserkenntnisse)
+   - [A. Der "Error 400 (Bad Request)" in Open WebUI](#a-der-error-400-bad-request-in-open-webui)
+   - [B. Das "Overcooking"-Problem: Warum FLUX.1 zwingend CFG 1.0 braucht](#b-das-overcooking-problem-warum-flux1-zwingend-cfg-10-braucht)
+   - [C. Der "Size mismatch for shared.weight"-Fehler beim CLIPLoader](#c-der-size-mismatch-for-sharedweight-fehler-beim-cliploader)
+   - [D. Der "not enough values to unpack (expected 5, got 3)" Fehler](#d-der-not-enough-values-to-unpack-expected-5-got-3-fehler)
+   - [E. AMD ROCm vs. NVIDIA nvfp4 (Warum int8_convrot nötig ist)](#e-amd-rocm-vs-nvidia-nvfp4-warum-int8_convrot-nötig-ist)
 5. [Modelle finden, testen & neue Funktionen nachrüsten](#5-modelle-finden-testen--neue-funktionen-nachrüsten)
 6. [VRAM-Sicherheit & Stabilitätsschutz (Freeze-Prävention)](#6-vram-sicherheit--stabilitätsschutz-freeze-prävention)
 7. [Roadmap: Offene TODOs & Optimierungen](#7-roadmap-offene-todos--optimierungen)
@@ -62,6 +67,7 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
   * **Diffusion Model:** `models/diffusion_models/wan2.1_t2v_14B_bf16.safetensors` (28.5 GB)
   * **Text Encoder:** `models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors` (6.7 GB)
   * **Video VAE:** `models/vae/wan_2.1_vae.safetensors` (254 MB)
+  * **Fertiger Workflow:** `user/default/workflows/wan2.1_t2v.json` *(im Menü direkt ladbar!)*
   * *Eigenschaft:* Höchste physikalische Bewegungskonsistenz und Detailtiefe. Nutzt deine 48 GB VRAM voll aus.
 * **MiniMax-H3 (Hailuo 03) – Video- & Native Audio-Generierung (AMD ROCm / HIP Edition):**
   * **Diffusion Core:** `models/diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors` (19.5 GB)
@@ -69,6 +75,8 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
   * **Video VAE:** `models/vae/minimax_h3_video_vae_int8_convrot.safetensors` (2.6 GB)
   * **Audio VAE:** `models/vae/minimax_h3_audio_vae_fp32.safetensors` (580 MB)
   * **Turbo LoRA (8-Steps):** `models/loras/minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors` (1.8 GB)
+  * **Beispiel-Eingabebild:** `input/transparent_rgb_gaming_mouse.png` (1.3 MB)
+  * **Fertige Workflows:** `user/default/workflows/video_minimax_h3_i2v_amd.json` & `video_minimax_h3_t2v_amd.json`
   * *Wichtige AMD-Besonderheit:* Standard-Workflows verlinken oft auf NVIDIA-`nvfp4`. Auf AMD ROCm muss zwingend die `int8_convrot`-Variante gewählt werden (per Symlink und Workflow-Preset automatisch abgesichert).
 
 ---
@@ -99,9 +107,13 @@ Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
    * Im Kasten (Node) **`Load Checkpoint`** das gewünschte Modell im Dropdown auswählen.
    * Prompt in die Textbox eintragen.
    * Rechts im Menü auf **"Queue Prompt"** klicken.
-3. **Videos mit Wan 2.1 (14B):**
-   * ComfyUI unterstützt Wan 2.1 nativ über `Load Diffusion Model` (`wan2.1_t2v_14B_bf16`), `Load CLIP` (`umt5_xxl_fp8`) und `Load VAE` (`wan_2.1_vae`).
-   * Die Ausgabe wird an den Node **`Video Combine`** (aus der installierten *VideoHelperSuite*) geleitet, der direkt ein `.mp4`-Video auf die Platte schreibt.
+3. **Videos mit Wan 2.1 (14B) ohne Kabelsalat:**
+   * Klicke oben rechts auf **"Workflows" ➔ `wan2.1_t2v.json`**.
+   * Der Workflow ist fertig verdrahtet:
+     * `UNETLoader`: `wan2.1_t2v_14B_bf16.safetensors`
+     * `CLIPLoader`: `umt5_xxl_fp8_e4m3fn_scaled.safetensors` mit Typ `wan`
+     * `VAELoader`: `wan_2.1_vae.safetensors`
+   * Prompt eingeben und auf **"Queue Prompt"** klicken. Die Ausgabe wird über **`Video Combine`** direkt als `.mp4` gespeichert.
 4. **Videos & Audio mit MiniMax-H3 (AMD-Version):**
    * In ComfyUI auf **"Workflows" ➔ `video_minimax_h3_i2v_amd.json`** (Image-to-Video) oder **`video_minimax_h3_t2v_amd.json`** (Text-to-Video) klicken.
    * **Modell-Dropdowns prüfen:**
@@ -125,9 +137,9 @@ ComfyUI wirkt wie ein unübersichtlicher Kabelsalat. **Du musst diese Kabel im A
 
 ---
 
-## 4. Fehlerbehebung & Praxiserkenntnisse (z. B. Error 400)
+## 4. Fehlerbehebung & Praxiserkenntnisse
 
-### Der "Error 400 (Bad Request)" in Open WebUI
+### A. Der "Error 400 (Bad Request)" in Open WebUI
 * **Symptom:** Open WebUI meldet beim Generieren: `Serverfehler (400): Error while queuing prompt`.
 * **Ursache:** In den ComfyUI-Logs (`journalctl --user -u comfyui`) stand:
   `Value not in list: ckpt_name: 'model.safetensors' not in [...]`  
@@ -135,6 +147,43 @@ ComfyUI wirkt wie ein unübersichtlicher Kabelsalat. **Du musst diese Kabel im A
 * **Lösung:**
   1. Auf Dateisystemebene wurde ein Symlink `model.safetensors -> flux1-schnell-fp8.safetensors` eingerichtet.
   2. In Open WebUI unter *Admin ➔ Einstellungen ➔ Bilder* muss explizit der tatsächliche Dateiname (z. B. `flux1-schnell-fp8.safetensors` oder `flux1-dev-fp8.safetensors`) eingetragen und gespeichert werden.
+
+### B. Das "Overcooking"-Problem: Warum FLUX.1 zwingend CFG 1.0 braucht
+* **Symptom:** Generierte Bilder (z. B. im Chat) wirken radioaktiv grell, neon-pink/lila übersättigt oder wie verbrannt.
+* **Ursache:** Der Parameter `CFG (Guidance Scale)` stand auf `8.0` (Standardwert für alte Modelle wie SD 1.5).
+  * FLUX.1 ist ein modernes **Flow-Matching-Modell** (Rectified Flow). Es benötigt kein künstliches CFG, um dem Prompt exakt zu folgen.
+  * Bei CFG `8.0` multipliziert der Sampler Kontraste und Sättigung um das Achtfache ("Overcooking").
+* **Lösung:**
+  * **CFG Scale fest auf `1.0` stellen!** (100% Original-Rechnung ohne Übersteuerung).
+  * **Geschwindigkeitsbonus:** Bei CFG 1.0 entfällt der negative Sampler-Schritt (`batch_size * 1` statt `batch_size * 2`). Die Generierung ist exakt **doppelt so schnell** (nur ca. 3–5 Sekunden für 1024×1024 mit FLUX [schnell] auf der Radeon PRO W7800).
+
+### C. Der "Size mismatch for shared.weight"-Fehler beim CLIPLoader
+* **Symptom:** Workflow bricht nach 3 Sekunden ab mit:
+  `Error(s) in loading state_dict for T5: size mismatch for shared.weight: copying a param with shape torch.Size([256384, 4096]) from checkpoint, the shape in current model is torch.Size([32128, 4096]).`
+* **Ursache:** Im Kasten **`CLIPLoader`** ist zwar der Text-Encoder für Wan 2.1 (`umt5_xxl_fp8_e4m3fn_scaled.safetensors`) gewählt, aber das Dropdown **`type`** darunter steht fälschlicherweise auf `lumina2`, `sd3` oder Standard.
+  * Standard-T5 (z. B. Lumina) hat ein Vokabular von **32.128** Tokens.
+  * Wan 2.1 UMT5-XXL hat ein Vokabular von **256.384** Tokens.
+  * Die Matrizen passen nicht zusammen.
+* **Lösung:** Im Node **`CLIPLoader`** das Dropdown **`type`** zwingend auf **`wan`** einstellen!
+
+### D. Der "not enough values to unpack (expected 5, got 3)" Fehler
+* **Symptom:** Workflow bricht beim `SamplerCustomAdvanced` ab mit:
+  `ValueError: not enough values to unpack (expected 5, got 3)`.
+* **Ursache:** Mischen von Video- und Bildkomponenten in einem Workflow:
+  * Das Videomodell **Wan 2.1** erwartet einen **5D-Video-Tensor** (`[Batch, Channel, Frames, Höhe, Breite]`).
+  * Wenn im Node `UNETLoader` noch versehentlich `wan2.1` ausgewählt ist, aber der Workflow von einem 2D-Bild-Latent (`EmptySD3LatentImage`) oder einem MiniMax-H3-Latent (gepackter 3D-NestedTensor) gefüttert wird, kann Wan die Dimensionen nicht entpacken.
+* **Lösung:**
+  * Immer aufeinander abgestimmte Workflows nutzen.
+  * Für Wan 2.1: Die Vorlage `wan2.1_t2v.json` nutzen (mit `EmptyHunyuanLatentVideo` / Wan-Latents).
+  * Für MiniMax-H3: Im `UNETLoader` immer das echte MiniMax-Modell (`minimax_h3_fl2va_pruned_int8_convrot.safetensors`) auswählen, nicht Wan!
+
+### E. AMD ROCm vs. NVIDIA nvfp4 (Warum int8_convrot nötig ist)
+* **Problem:** Viele offizielle Vorlagen von Comfy-Org für MiniMax-H3 referenzieren standardmäßig `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors`. Das Format `nvfp4` ist ein proprietäres Tensor-Format für neuere NVIDIA-Karten (RTX 40er / Blackwell). Auf AMD ROCm schlägt der Kernel fehl oder fällt quälend langsam auf die CPU zurück.
+* **Lösung:**
+  * Auf AMD-Hardware muss immer die Variante **`int8_convrot`** geladen werden:
+    * Text-Encoder: `qwen3vl_32b_minimax_h3_int8_convrot.safetensors`
+    * Diffusion-Core: `minimax_h3_fl2va_pruned_int8_convrot.safetensors`
+  * **Absicherung per Symlink:** Ein Symlink `models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors -> qwen3vl_32b_minimax_h3_int8_convrot.safetensors` leitet auch unbedarft importierte Community-Workflows automatisch auf den AMD-Kern um.
 
 ---
 
@@ -210,5 +259,9 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 | **VRAM-Auslastung prüfen** | `rocm-smi --showmeminfo vram` |
 | **Ollama VRAM leeren** | `systemctl restart ollama` |
 | **Freien Festplattenspeicher prüfen** | `df -h /home` |
-| **Modelle auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/checkpoints/` |
+| **Checkpoints auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/checkpoints/` |
+| **Diffusionsmodelle auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/diffusion_models/` |
+| **Fertige Workflows auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/user/default/workflows/` |
+| **MiniMax-H3 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_minimax_h3.sh` |
+| **Wan 2.1 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_wan.sh` |
 
