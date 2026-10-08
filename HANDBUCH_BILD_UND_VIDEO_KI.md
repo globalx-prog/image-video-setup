@@ -13,9 +13,11 @@
   - [2. Installierte Modelle \& Empfohlene Einsatzbereiche](#2-installierte-modelle--empfohlene-einsatzbereiche)
     - [A. Standalone Checkpoints (`ComfyUI/models/checkpoints/`)](#a-standalone-checkpoints-comfyuimodelscheckpoints)
     - [B. High-End Video Diffusion (`ComfyUI/models/`)](#b-high-end-video-diffusion-comfyuimodels)
-    - [C. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)](#c--top-10-freie-video-modelle-textimage-to-video)
-    - [D. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)](#d--top-10-freie-bild-modelle-text-to-image)
-    - [E. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)](#e--erkenntnisse-aus-den-leaderboards-artificial-analysis--arenaai)
+    - [C. 🧩 Das Baukasten-Prinzip: Erklärung aller bisherigen Teilmodelle](#c--das-baukasten-prinzip-erklärung-aller-bisherigen-teilmodelle)
+    - [D. 🎛️ Kreative Kontrolle & Bildbearbeitung (ControlNet & RMBG-2.0)](#d-️-kreative-kontrolle--bildbearbeitung-controlnet--rmbg-20)
+    - [E. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)](#e--top-10-freie-video-modelle-textimage-to-video)
+    - [F. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)](#f--top-10-freie-bild-modelle-text-to-image)
+    - [G. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)](#g--erkenntnisse-aus-den-leaderboards-artificial-analysis--arenaai)
   - [3. Tägliche Nutzung: Schritt für Schritt](#3-tägliche-nutzung-schritt-für-schritt)
     - [A. Schnelle Bilder im Chat (Open WebUI)](#a-schnelle-bilder-im-chat-open-webui)
     - [B. Videos \& High-End Grafik (ComfyUI)](#b-videos--high-end-grafik-comfyui)
@@ -59,6 +61,8 @@ Um die volle Leistung deiner 48 GB AMD-Grafikkarte abzurufen, arbeitet das Setup
 ---
 
 ## 2. Installierte Modelle & Empfohlene Einsatzbereiche
+
+> 💡 **Ausführliches Benchmark-Ranking & Gesamtübersicht:** Siehe [BILD_UND_VIDEO_BENCHMARK_BEWERTUNG.md](BILD_UND_VIDEO_BENCHMARK_BEWERTUNG.md) für das vollständige Multi-Kriterien-Ranking aller 4 Kategorien (Bild, Video, Sprach-KI & ControlNets).
 
 Alle Modelle sind heruntergeladen, verifiziert und in ComfyUI registriert:
 
@@ -107,7 +111,67 @@ Gegen LTX-Video 2B (das du bereits installiert hast):
 - MiniMax-H3 ist qualitativ spürbar detaillierter und filmreifer als LTX-Video.
 - LTX-Video ist dafür 5-mal schneller und extrem leichtgewichtig.
 
-### C. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)
+### C. 🧩 Das Baukasten-Prinzip: Erklärung aller bisherigen Teilmodelle
+
+Warum gibt es neben Standalone-Checkpoints (wie FLUX oder SDXL) so viele separate Ordner wie `diffusion_models`, `text_encoders`, `vae` und `loras`?
+
+#### 1. Der Unterschied: Monolith vs. Baukasten
+* **Monolithische Checkpoints (`models/checkpoints/`):** Klassische Modelle packen alles (Text-Verständnis, Diffusions-Kern und Bild-Dekodierer) in eine einzige große Datei. Das ist bequem, aber unflexibel und verschwendet VRAM, da alles gleichzeitig im Speicher gehalten werden muss.
+* **Modulare Teilmodelle (Diffusers-Architektur):** Moderne High-End Modelle wie **Wan 2.1**, **MiniMax-H3** und professionelle FLUX-Pipelines trennen die drei Kernaufgaben strikt voneinander:
+  1. **Text Encoder (Das Gehirn für Sprache):** Übersetzt deinen englischen oder deutschen Prompt in hochdimensionale mathematische Einbettungen (Embeddings). Läuft nur am Anfang des Renderings und kann danach sofort aus dem VRAM entladen werden!
+  2. **Diffusion Model / DiT (Der Bild-/Video-Maler):** Das eigentliche gigantische neuronale Netz, das aus reinem Rauschen Schritt für Schritt die Bewegung und Details formt.
+  3. **VAE (Der Übersetzer von Latent zu Pixeln):** Arbeitet nicht im teuren Pixelraum, sondern komprimiert Bilder/Videos um den Faktor 8x bis 16x in den "Latent Space". Erst ganz am Schluss wandelt der VAE-Decoder die Daten in ein sichtbares PNG oder MP4 um.
+
+#### 2. Detaillierte Bestandsaufnahme aller installierten Teilmodelle:
+
+| Kategorie & Ordner | Installierte Datei | Größe | Funktion & Zusammenspiel |
+| :--- | :--- | :--- | :--- |
+| **Diffusion Cores**<br>`models/diffusion_models/` | `wan2.1_t2v_14B_bf16.safetensors` | 27.2 GB | **Alibaba Wan 2.1 (14B):** Unkomprimierter DiT in voller BF16-Präzision. Spezialisiert auf physikalisch korrekte Simulation von Licht, Kleidung, Wasser und Bewegung. |
+| | `minimax_h3_fl2va_pruned_int8_convrot.safetensors` | 19.5 GB | **MiniMax Hailuo-03 Core:** AMD ROCm-optimierter Kern, der simultan Video- und Audio-Latents generiert. |
+| **Text Encoders**<br>`models/text_encoders/` | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` | 6.3 GB | **Google UMT5-XXL:** Universeller multilingualer Sprach-Encoder für Wan 2.1 (versteht hochkomplexe, verschachtelte Prompts). |
+| | `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` | 25.3 GB | **Qwen3-VL (32B):** Multimodales Großmodell als Text- und Bild-Interpreter für MiniMax-H3 (AMD-optimierte Rotationstensor-Version). |
+| **Variational Autoencoder**<br>`models/vae/` | `wan_2.1_vae.safetensors` | 243 MB | **Wan 3D VAE:** Temporaler Video-Decoder, der flüssige Frame-Übergänge ohne Flimmern gewährleistet. |
+| | `minimax_h3_video_vae_int8_convrot.safetensors` | 2.6 GB | **MiniMax Video VAE:** Dekodiert die visuellen Farb- und Kontrast-Informationen. |
+| | `minimax_h3_audio_vae_fp32.safetensors` | 578 MB | **MiniMax Audio VAE:** Einzigartiger Audio-Synthesizer, der die latenten Sound-Tokens in eine hörbare MP3/WAV-Tonspur umrechnet. |
+| **LoRAs & Adapter**<br>`models/loras/` | `minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors` | 1.8 GB | **8-Step Turbo LoRA:** Reduziert die Renderzeit von MiniMax-H3 drastisch von 50 Schritten auf nur 8 Schritte bei fast identischer Qualität. |
+| | `FireRed-Image-Edit-1.0-Lightning-8steps-v1.0.safetensors` | 811 MB | **Image-Edit Lightning LoRA:** Ermöglicht gezielte Bildanpassungen und Stylings mit minimaler Schrittzahl. |
+| **Upscaler**<br>`models/upscale_models/` | `R-ESRGAN 4x+.pth` | 64 MB | **Real-ESRGAN 4x+:** Industriestandard für neuronales 4K-Upscaling von Gesichtern, Texturen und feinen Details. |
+
+---
+
+### D. 🎛️ Kreative Kontrolle & Bildbearbeitung (ControlNet & RMBG-2.0)
+
+Um nicht nur "Zufallsbilder per Text" zu generieren, sondern die volle Regie über Haltung, Tiefenschärfe, Kanten und Freistellen zu übernehmen:
+
+#### 1. Hintergrund-Entfernung & Freistellen: RMBG-2.0 (`models/background_removal/`)
+* **Installierte Modelle:** `RMBG-2.0.safetensors` & Symlink `birefnet.safetensors` (844 MB)
+* **Basis & Technologie:** Entwickelt von BRIA AI auf Basis modernster BiRefNet-Architektur.
+* **Leistung & Stärke:**
+  * Entfernt Hintergründe in Bruchteilen einer Sekunde mit Sub-Pixel-Genauigkeit.
+  * Erkennt feinste Haarsträhnen, transparente Gläser, Schmuck und komplexe Produktkanten ohne Fransenkanten.
+  * Liefert sowohl ein **transparentes RGBA-Bild** als auch eine saubere **Schwarz-Weiß-Maske** für Inpainting-Workflows.
+* **Einsatz in ComfyUI:**
+  * Nativer Node: `Load Background Removal Model` ➔ `Remove Background`.
+
+#### 2. All-in-One ControlNet Union Modelle (`models/controlnet/`)
+Statt für jede Kontrollmethode (Pose, Tiefe, Kante) eine eigene 2-GB-Datei zu laden, nutzen wir moderne **Union-Modelle** (alle Kontrollarten in einer einzigen Datei):
+
+| Modell | Datei | Größe | Unterstützte Modi in 1 Modell |
+| :--- | :--- | :--- | :--- |
+| **SDXL ControlNet Union ProMax** | `controlnet-union-sdxl-1.0-promax.safetensors` | 2.5 GB | **10+ Modi:** OpenPose (Körperhaltung), Depth (3D-Tiefe), Canny & Lineart (Kanten/Zeichnungen), Scribble (Handskizzen), Tile (Upscale/Detailer), Normal Map, Segment. |
+| **FLUX.1-dev ControlNet Union Pro** | `flux1-dev-controlnet-union-pro.safetensors` | 6.6 GB | **7 Modi:** Canny, Depth, Pose, Tile, Blur, Gray, Low-Quality speziell trainiert für die FLUX.1 [dev] Transformer-Architektur. |
+
+* **Typische Praxisszenarien:**
+  * **Exakte Körperhaltung:** Ein Foto einer Person als Pose vorgeben ➔ FLUX generiert deinen Charakter in exakt derselben Pose.
+  * **Produktplatzierung & 3D-Tiefe:** Tiefenkarte (Depth) eines Zimmers oder Tisches vorgeben ➔ Neues Objekt fügt sich perfekt perspektivisch ein.
+  * **Logo & Skizzen-Rendering:** Handzeichnung per Canny/Lineart einspeisen ➔ Modell malt fotorealistisches Bild exakt entlang der Linien.
+* **Empfohlene Node-Einstellungen:**
+  * Node: `Apply ControlNet` oder `Apply ControlNet (Advanced)`.
+  * Stärke (`strength`): **0.6 bis 0.8** (ideal für natürliche Integration, bei 1.0 wirkt das Ergebnis manchmal übersteuert).
+
+---
+
+### E. 🎬 Top 10 Freie VIDEO-Modelle (Text/Image-to-Video)
 
 | Rang | Modell | Entwickler | Größe / VRAM | Wichtigste Eigenschaften | Umsetzung / Eignung | Status Lokal |
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -123,7 +187,7 @@ Gegen LTX-Video 2B (das du bereits installiert hast):
 | **10** | **DynamiCrafter** | CUHK / Tencent | ~7 GB | Starke Image-to-Video Animationen mit steuerbarer Kameradynamik. | ComfyUI DynamiCrafter | Möglich (Download) |
 | *Top* | **MiniMax-H3 (Hailuo 03)** | MiniMax | ~19.5 GB (int8_convrot) | State-of-the-Art Video mit nativer Sound-/Audio-Generierung. | ComfyUI Diffusers/HIP | **Bereit ✅** |
 
-### D. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)
+### F. 🎨 Top 10 Freie BILD-Modelle (Text-to-Image)
 
 | Rang | Modell | Entwickler | Größe / Format | Wichtigste Eigenschaften | Umsetzung / Eignung | Status Lokal |
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -138,7 +202,7 @@ Gegen LTX-Video 2B (das du bereits installiert hast):
 | **9** | **SDXL Turbo** | Stability AI | ~6.5 GB | 1-Step Echtzeit-Bildgenerierung für Live-Workflows. | ComfyUI Checkpoint | Möglich (Download) |
 | **10** | **PixArt-Sigma** | PixArt Alpha | ~3.5 GB | Sehr kompakt, 4K-fähig, exzellente Schärfe bei geringem Speicherbedarf. | ComfyUI Checkpoint | Möglich (Download) |
 
-### E. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)
+### G. 🔍 Erkenntnisse aus den Leaderboards (Artificial Analysis & Arena.ai)
 
 #### Text-to-Image:
 * **Proprietäre Spitzenreiter:** Recraft V3, Midjourney v6.1 und DALL-E 3 führen die Elo-Rankings bei reinen Cloud-Diensten an.
@@ -364,4 +428,97 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 | **AMD GPU 60s-Watchdog Patch** | `sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh` |
 | **MiniMax-H3 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_minimax_h3.sh` |
 | **Wan 2.1 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_wan.sh` |
+
+---
+
+## 9. Praxis-Architektur: Reines VRAM-Computing, Swap-Falle & MiniMax-H3 Tuning
+
+### 9.1 Reines VRAM-Computing vs. RAM-Offloading
+* **VRAM-Bandbreite (AMD Radeon PRO W7800):** **864 GB/s**.
+* **PCIe 4.0 Schnittstelle:** max. **31 GB/s**.
+* **Festplatten-Swap (NVMe):** nur **1–3 GB/s**.
+
+Wann immer ein Modell vollständig in den VRAM passt, läuft die Berechnung ohne Latenzverzögerung mit voller GPU-Bandbreite.
+
+### 9.2 Warum MiniMax H3 die 48 GB Grenze sprengt
+* **Qwen3-VL 32B (Text- & Bild-Encoder):** 25,9 GB VRAM
+* **MiniMax FL2VA DiT (Video-Kern):** 20,0 GB VRAM
+* **Working Memory (Attention-Cache & Latents):** ca. 8,0 GB VRAM
+* **Gesamtbedarf bei simultaner Vorhaltung:** **56,6 GB VRAM** (übersteigt 48 GB physischen VRAM).
+* **Lösung:** Sequentieller Betrieb (Text analysieren ➔ Text-Encoder verwerfen ➔ Videokern laden).
+
+### 9.3 Die Swap-Falle & Lösung
+* **Problem:** Beim Modelltausch sicherte ComfyUI 26 GB inaktive Gewichte in den Host-RAM (`--cache-ram 8 32`). Der 64 GB RAM lief voll und Linux lagerte 20 GB auf den NVMe-Swap aus ➔ Desktop stockte / fror für 5 Minuten ein.
+* **Lösung:** In `start_comfyui.sh` wurde `--cache-ram 4 16` hinterlegt. ComfyUI begrenzt den inaktiven Cache auf max. 16 GB. Der RAM bleibt unter 35 GB und Swap wird nicht ausgelöst.
+
+### 9.4 Modell-Vergleich auf der 48 GB W7800
+
+| Modell | Text-Encoder | Video-Core | Working Memory | Gesamt VRAM | Bleibt 100% im VRAM? |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **Wan 2.1 (14B)** | 6,3 GB (UMT5-XXL) | 27,2 GB | 6,0 GB | **~39,5 GB** | **Ja (Optimal für 48 GB)** |
+| **Flux.1 [dev]** | 4,8 GB (T5-XXL) | 17,2 GB | 6,0 GB | **~28,0 GB** | **Ja (3–5 Sekunden)** |
+| **MiniMax H3** | 25,9 GB (Qwen 32B) | 20,0 GB | 8,0 GB | **~56,6 GB** | ❌ Sequentieller Tausch |
+
+### 9.5 MiniMax H3: Turbo-Modus vs. Standard-Modus
+* `turbo_mode: false`: 50 Schritte, ca. 40 Sekunden pro Schritt = **~33 Minuten Rechenzeit** (0% bleibt für die ersten 2 Minuten stehen).
+* `turbo_mode: true`: 8 Schritte, ca. 25 Sekunden pro Schritt = **~2,5 Minuten Gesamtrechenzeit** (Balken springt direkt auf 12% ➔ 25%...).
+
+### 9.6 Wan 2.2 & Qwen-Image-2.1: Warum sie auf 48 GB optimal laufen
+* **Wan 2.2 (Dual DiT 14B):**
+  * Verwendet zwei spezialisierte DiTs: High-Noise (13,3 GB) und Low-Noise (13,3 GB) sowie UMT5-XXL (6,3 GB).
+  * Da beide Diffusionskerne zusammen nur ~26,6 GB wiegen, passen Text-Encoder, High-Noise DiT, Low-Noise DiT und VAE **gleichzeitig zu 100 % in die 48 GB VRAM**.
+  * Während 24 GB Grafikkarten (RTX 4090) mitten im Video-Sampling Modelle über PCIe tauschen müssen, arbeitet die W7800 unterbrechungsfrei in voller GPU-Bandbreite.
+* **Qwen-Image-2.1 (SOTA Bild & Typografie):**
+  * Nutzt den kompakten INT8-ConvRot-Kern (6,8 GB) + Qwen3.5 PE (8,9 GB).
+  * Belegt nur ~18 GB VRAM und erzeugt fehlerfreien Text und native 2K-Bilder direkt im VRAM.
+
+### 9.7 VRAM-Cleanup: Wann unnötig und wann notwendig?
+* **Bei kontinuierlicher Arbeit mit EINEM Modell (Wan, FLUX, SDXL, Qwen-Image): VRAM-Cleanup ist UNNÖTIG!**
+  * **SDXL:** ~6–8 GB VRAM | **Qwen-Image-2.1:** ~18–22 GB | **FLUX.1 [dev]:** ~20–24 GB | **Wan 2.1 / Wan 2.2:** ~24–38 GB.
+  * Alle diese Modelle passen zu **100 % dauerhaft in die 48 GB VRAM** deiner AMD Radeon PRO W7800.
+  * **Wichtig:** Keinen `VRAM-Cleanup`-Knoten im Workflow verwenden! Wenn die Modelle im VRAM verbleiben, starten Folge-Generierungen in **0 Sekunden** ohne Ladezeit. Ein Cleanup erzwingt bei jedem Run 15–45 Sekunden unnötiges Neuladen von der NVMe-SSD.
+* **Wann VRAM-Cleanup sinnvoll und notwendig ist:**
+  1. **Nur bei Modell-Wechsel:** z. B. von Wan ➔ MiniMax H3 oder von Flux ➔ Wan (einmalig im WebUI oben rechts auf `Unload Models` klicken, um alten Speicher sauber freizugeben).
+  2. **Bei MiniMax H3 (als einzigem Modell über 48 GB):**
+     * **Nach Bildladen / Konditionierung:** Der 26 GB Text- & Bild-Encoder (`qwen3vl_32b`) muss weichen, um Platz für den 20 GB DiT-Kern zu machen (regelt ComfyUI intern).
+     * **Nach Generierung:** MiniMax über `Unload Models` entladen, damit der 26 GB Encoder nicht dauerhaft den Host-RAM blockiert.
+
+---
+
+## 10. Leitfaden: Der Turbo-Modus (Bedeutung, Qualität & Konfiguration)
+
+### 10.1 Technische Funktionsweise (Wissensdestillation)
+* **Standard-Diffusion:** Rechnet 20 bis 50 kleine Schritte aus dem Rauschen.
+* **Turbo-Destillation (Lightning / Hyper):** Ein LoRA trainiert das Modell darauf, mehrere Rechenschritte in einen einzigen großen Schritt zusammenzufassen.
+* **Ergebnis:** Reduktion von 50 auf 8 Schritte (MiniMax) bzw. von 20 auf 4 Schritte (Wan 2.2). Beschleunigung um Faktor 5 bis 13.
+
+### 10.2 Einfluss auf die Qualität
+* **Bewegung, Kamera & Dynamik:** 98 % identisch mit Standardmodellen.
+* **Mikro-Details:** Ca. 5 % weicher bei Standbildern. In 24 FPS Bewegung für das menschliche Auge nicht wahrnehmbar.
+* **Geschwindigkeit:** Wan 2.2 Videos rendern in ~60–90 Sekunden statt 6–8 Minuten; MiniMax H3 in 2,5 Minuten statt 33 Minuten.
+
+### 10.3 Die goldenen Konfigurationsregeln
+1. **CFG MUSS auf 1.0 gesetzt werden:** Turbo-LoRAs übersteuern und verbrennen bei CFG > 1.5. Bei CFG 1.0 entfällt zudem der negative Berechnungsschritt (doppelte Geschwindigkeit).
+2. **Schrittzahl exakt einhalten:** Ein 4-Step-LoRA verlangt exakt 4 Schritte; ein 8-Step-LoRA exakt 8 Schritte.
+
+---
+
+## 11. Spezial-Leitfäden & Weiterführende Dokumentation
+
+Für detaillierte Schritt-für-Schritt-Anleitungen stehen separate Praxisleitfäden zur Verfügung:
+
+1. 🎵 [**Anleitung: Audio & Ton in KI-Videos integrieren**](file:///home/clemi/Projekte/LLM/image-video-setup/anleitung_audio_in_videos.md):  
+   Muxing direkt in ComfyUI über `LoadAudio` an `VHS_VideoCombine`, KI-Soundeffekte (Foley AI) und FFmpeg-Befehle.
+2. 🎬 [**Anleitung: Längere KI-Videos erstellen (10s, 30s, 1m+)**](file:///home/clemi/Projekte/LLM/image-video-setup/anleitung_laengere_videos.md):  
+   Der „Last-Frame Chaining“-Workflow (Frame 49 ➔ Startbild für Clip 2), filmische Storyboard-Montage und Frame-Interpolation.
+3. 💾 [**Leitfaden: Modell- & VRAM-Entladung**](file:///home/clemi/Projekte/LLM/image-video-setup/modelle_direkt_entladen.md):  
+   Warum VRAM-Cleanup bei Wan/Flux unnötig ist und warum nur MiniMax H3 und Modellwechsel Entladen erfordern.
+4. ⚙️ [**ComfyUI Knoten- & Parameterreferenz**](file:///home/clemi/Projekte/LLM/image-video-setup/nodes.md):  
+   Detaillierte Erläuterungen zu Dual-DiT-Splits, samplers, Parametern und Stabilitäts-Flags (`start_comfyui.sh`).
+5. 🐭 [**Regie- & Produktionsleitfaden: 15s-Kurzfilm (MiniMax H3)**](file:///home/clemi/Projekte/LLM/image-video-setup/anleitung_kurzfilm_maus_minimax.md):  
+   Vollständiges Storyboard, Kamera- & Szenen-Settings, Audio-Prompts und FFmpeg-Concat für „Die kleine Maus im Käseladen“.
+6. ⛓️ [**Praxisleitfaden: Multi-Stage Workflows & Video-Erweiterung**](file:///home/clemi/Projekte/LLM/image-video-setup/anleitung_multistage_und_video_erweiterung.md):  
+   Automatisierte Verkettung in ComfyUI, Abspeichern aller Einzelclips plus Gesamtfilm und nachträgliches Erweitern ohne Neurendern.
+7. 📊 [**Stabilitäts- & Auflösungsmatrix (MiniMax H3 vs. Wan 2.2)**](file:///home/clemi/Projekte/LLM/image-video-setup/SPEICHER_UND_AUFLOESUNG_MATRIX.md):  
+   Warum Megapixel quadratisch skalieren, warum 0.8 mit MiniMax H3 crasht und wie man das System mit 0.4 dauerhaft lag-frei hält.
 

@@ -1,0 +1,19 @@
+| Vergleich                     | **H3 Setup 1 – empfohlen**    | **H3 Setup 2 – Qualitätsmodus**                        | **Wan2.2 A14B – Gegenspieler**                                                   |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Modell                        | `fl2va_int8_convrot`          | `fl2va_int8_convrot`                                   | T2V/I2V-A14B                                                                     |
+| Diffuser                      | **Full INT8 ConvRot, 34 GB**  | **Full INT8 ConvRot, 34 GB**                           | 14B MoE, High-/Low-Noise-Expert                                                  |
+| Text Encoder                  | **Qwen3-VL-32B INT8**         | **Qwen3-VL-32B BF16**, nur zum Encoding auf CPU/RAM    | UMT5-XXL; je nach Workflow FP8/FP16                                              |
+| VAE                           | Video **FP16** + Audio FP32   | Video **FP16** + Audio FP32                            | Wan VAE                                                                          |
+| VRAM-Bedarf                   | **sehr gut passend**          | Diffuser passt, Encoder RAM                            | 48 GB mit Offload/quantisiert; offiziell nennt Wan für Single-GPU A14B **80 GB** |
+| RAM-Bedarf                    | **gut**                       | **hoch**; BF16-Encoder ~51,5 GB, daher knapp mit 64 GB | mittel–hoch bei Offload                                                          |
+| Native Audio                  | **✅ Stereo Audio integriert** | **✅ Stereo Audio integriert**                          | Standard T2V/I2V **❌ kein natives Audio**                                        |
+| Prompt-/VLM-Verständnis       | ⭐⭐⭐⭐⭐−                        | **⭐⭐⭐⭐⭐**                                              | ⭐⭐⭐⭐½                                                                            |
+| Bild-/Referenztreue           | ⭐⭐⭐⭐⭐−                        | **⭐⭐⭐⭐⭐**                                              | ⭐⭐⭐⭐⭐                                                                            |
+| Bewegungsqualität             | ⭐⭐⭐⭐½                         | ⭐⭐⭐⭐½                                                  | **⭐⭐⭐⭐⭐**                                                                        |
+| Kameraführung/Cinematic       | ⭐⭐⭐⭐½                         | ⭐⭐⭐⭐½                                                  | **⭐⭐⭐⭐⭐**                                                                        |
+| Audio/SFX/Musik               | **⭐⭐⭐⭐⭐**                     | **⭐⭐⭐⭐⭐**                                              | ⭐⭐                                                                               |
+| Detailqualität                | ⭐⭐⭐⭐⭐−                        | **⭐⭐⭐⭐⭐**                                              | ⭐⭐⭐⭐⭐                                                                            |
+| Geschwindigkeit auf W7800     | ⭐⭐⭐⭐                          | ⭐⭐⭐                                                    | ⭐⭐⭐                                                                              |
+| AMD/ROCm-Fit                  | **⭐⭐⭐⭐**                      | ⭐⭐⭐½                                                   | ⭐⭐⭐½                                                                             |
+| Gesamt für **deinen Rechner** | **🏆 9,3/10**                 | **🏆 9,5/10**                                          | **8,9/10**                                                                       |
+| Meine Wahl                    | **✅ Standardbetrieb**         | **✅ schwierige/Referenz-Shots**                        | **✅ wenn Bewegung Priorität hat**                                                |
