@@ -6,4 +6,6 @@ ComfyUI/
 *.pth
 *.bin
 *.log
+wget-log*
 __pycache__/
+

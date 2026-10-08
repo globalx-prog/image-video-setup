@@ -41,3 +41,4 @@ echo "=========================================================="
 echo " ✅ AMD-Treiber-Patch erfolgreich installiert!"
 echo " 👉 Die 60s-Timeouts sind nach dem nächsten Neustart aktiv."
 echo "=========================================================="
+
