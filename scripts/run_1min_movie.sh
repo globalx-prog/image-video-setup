@@ -41,8 +41,9 @@ SELECTED_MP="0.6"
 SELECTED_STEPS="10"
 ENABLE_UPSCALE=true
 HARD_CUTS=true
-FAN_PROFILE="sweet-spot"
+FAN_PROFILE="adaptive"
 FAN_MANAGED=false
+FAN_PID=""
 
 # Interaktive Abfrage nur wenn Terminal aktiv ist und keine Flags übergeben wurden
 if [ -t 0 ] && [ "$#" -eq 0 ]; then
@@ -53,18 +54,21 @@ if [ -t 0 ] && [ "$#" -eq 0 ]; then
 
     # --- 1. W7800 Lüfter & Kühlprofil ---
     echo "🌀 [1/3] W7800 LÜFTER- & POWER-PROFIL WÄHLEN:"
-    echo "   [1] 🌟 Sweet-Spot (Empfohlen): 205W, 55% Lüfter (~74°C, leise & kühl)"
-    echo "   [2] 🚀 Performance-Boost:     230W, 65% Lüfter (max. Taktung, thermisch stabil)"
-    echo "   [3] ❄️ Extreme-Cooling:       230W, 85% Lüfter (maximale Kühlung für Dauerlast)"
-    echo "   [4] 🔇 Silent / Desktop:       150W, 40% Lüfter (flüsterleise)"
-    echo "   [5] ⚙️ Standard Automatik:    vBIOS-Automatik (keine manuelle Regelung)"
-    read -p "   Ihre Auswahl [1-5, Standard: 1]: " fan_choice
+    echo "   [1] 🌡️ Adaptive Kurve (Empfohlen): Regelt Lüfter live nach Hotspot-Temperatur"
+    echo "                              (<55°C: 37% | 55-65°C: 53% | 65-75°C: 65% | >75°C: 76%)"
+    echo "   [2] 🌟 Sweet-Spot (Statisch): 205W, 55% Lüfter (~74°C, leise & kühl)"
+    echo "   [3] 🚀 Performance-Boost:     230W, 65% Lüfter (max. Taktung, thermisch stabil)"
+    echo "   [4] ❄️ Extreme-Cooling:       230W, 85% Lüfter (maximale Kühlung für Dauerlast)"
+    echo "   [5] 🔇 Silent / Desktop:       150W, 40% Lüfter (flüsterleise)"
+    echo "   [6] ⚙️ Standard Automatik:    vBIOS-Automatik (keine manuelle Regelung)"
+    read -p "   Ihre Auswahl [1-6, Standard: 1]: " fan_choice
     case "$fan_choice" in
-        2) FAN_PROFILE="boost" ;;
-        3) FAN_PROFILE="set-fan 85" ;;
-        4) FAN_PROFILE="set-fan 40" ;;
-        5) FAN_PROFILE="auto" ;;
-        *) FAN_PROFILE="sweet-spot" ;;
+        2) FAN_PROFILE="sweet-spot" ;;
+        3) FAN_PROFILE="boost" ;;
+        4) FAN_PROFILE="set-fan 85" ;;
+        5) FAN_PROFILE="set-fan 40" ;;
+        6) FAN_PROFILE="auto" ;;
+        *) FAN_PROFILE="adaptive" ;;
     esac
     echo "   👉 Gewählt: $FAN_PROFILE"
     echo ""
@@ -123,6 +127,10 @@ while [[ $# -gt 0 ]]; do
             SELECTED_MP="$2"
             shift 2
             ;;
+        --adaptive|--fan-curve)
+            FAN_PROFILE="adaptive"
+            shift
+            ;;
         --smooth)
             HARD_CUTS=false
             shift
@@ -138,10 +146,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Sicherheits-Trap: Bei Skriptende oder Abbruch (Ctrl+C) Lüfter zurück auf Automatik setzen
+# Sicherheits-Trap: Bei Skriptende oder Abbruch (Ctrl+C) Hintergrund-Prozess stoppen & Lüfter auf Automatik
 cleanup_fan_on_exit() {
-    if [ "$FAN_MANAGED" = true ] && [ -f "scripts/w7800_perf_boost.sh" ]; then
+    if [ -n "$FAN_PID" ]; then
         echo ""
+        echo "🛑 Beende adaptive Lüfterkurve (PID: $FAN_PID)..."
+        sudo kill "$FAN_PID" 2>/dev/null || true
+        wait "$FAN_PID" 2>/dev/null || true
+    fi
+    if [ "$FAN_MANAGED" = true ] && [ -f "scripts/w7800_perf_boost.sh" ]; then
         echo "🌀 Setze W7800 Lüftersteuerung sicher zurück auf vBIOS-Automatik..."
         sudo ./scripts/w7800_perf_boost.sh auto >/dev/null 2>&1 || true
     fi
@@ -152,11 +165,21 @@ trap cleanup_fan_on_exit EXIT INT TERM
 if [ -f "scripts/w7800_perf_boost.sh" ] && [ "$FAN_PROFILE" != "auto" ]; then
     echo "🌀 Wende Lüfterprofil '$FAN_PROFILE' auf AMD Radeon PRO W7800 an..."
     if command -v sudo >/dev/null 2>&1; then
-        if sudo ./scripts/w7800_perf_boost.sh $FAN_PROFILE; then
+        if [ "$FAN_PROFILE" = "adaptive" ] || [ "$FAN_PROFILE" = "fan-curve" ]; then
+            # Power-Limit auf 205W Sweet-Spot & Compute Profil setzen
+            sudo ./scripts/w7800_perf_boost.sh sweet-spot >/dev/null 2>&1 || true
+            # Starte dynamische Lüfterkurve im Hintergrund
+            sudo ./scripts/w7800_perf_boost.sh fan-curve >/dev/null 2>&1 &
+            FAN_PID=$!
             FAN_MANAGED=true
-            echo "✅ Lüfterprofil aktiv."
+            echo "✅ Adaptive Lüfterkurve aktiv im Hintergrund (PID: $FAN_PID, regelt live nach Hotspot-Temperatur)."
         else
-            echo "⚠️ Konnte Lüfterprofil nicht setzen (Passwort-Prompt abgelehnt?). Fahre mit vBIOS fort."
+            if sudo ./scripts/w7800_perf_boost.sh $FAN_PROFILE; then
+                FAN_MANAGED=true
+                echo "✅ Lüfterprofil aktiv."
+            else
+                echo "⚠️ Konnte Lüfterprofil nicht setzen (Passwort-Prompt abgelehnt?). Fahre mit vBIOS fort."
+            fi
         fi
     fi
     echo ""

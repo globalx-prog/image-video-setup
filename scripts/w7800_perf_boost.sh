@@ -267,7 +267,7 @@ case "$1" in
     reset)
         reset_defaults
         ;;
-    fan-curve|curve)
+    fan-curve|curve|adaptive)
         dynamic_fan_curve
         ;;
     set-fan|fan)
