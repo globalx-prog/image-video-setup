@@ -539,6 +539,49 @@ Return ONLY a valid JSON array of objects without markdown formatting:
         return scenes
 
 
+def detect_scene_characters(sc, prompt_text, has_char2=False):
+    """
+    Ermittelt intelligent, welche Charaktere in einer Szene vorkommen:
+    Rückgabe: 'char1_only', 'char2_only', 'both', oder 'generic'
+    Ermöglicht Smart Reference Routing (Solo-Isolation) zur Vermeidung von Attention-Bleed.
+    """
+    # 1. Explizite Deklaration im Drehbuch / YAML falls vorhanden
+    if "character" in sc:
+        c_val = str(sc["character"]).strip().lower()
+        if c_val in ["1", "char1", "cross", "detective"]:
+            return "char1_only"
+        elif c_val in ["2", "char2", "elena"]:
+            return "char2_only"
+        elif c_val in ["both", "1,2", "all", "duo", "two_shot"]:
+            return "both"
+
+    if "characters" in sc:
+        c_list = [str(x).strip().lower() for x in sc["characters"]]
+        if ("1" in c_list or "char1" in c_list) and ("2" in c_list or "char2" in c_list):
+            return "both"
+        elif "2" in c_list or "char2" in c_list:
+            return "char2_only"
+        elif "1" in c_list or "char1" in c_list:
+            return "char1_only"
+
+    # 2. Token- und Namensanalyse im Prompt
+    text_lower = prompt_text.lower()
+    has_pic1 = "<picture 1>" in text_lower or "detective cross" in text_lower or ("cross" in text_lower and "elena" not in text_lower)
+    has_pic2 = "<picture 2>" in text_lower or "elena vance" in text_lower or "elena" in text_lower
+
+    if not has_char2:
+        return "char1_only"
+
+    if has_pic1 and has_pic2:
+        return "both"
+    elif has_pic2 and not has_pic1:
+        return "char2_only"
+    elif has_pic1 and not has_pic2:
+        return "char1_only"
+    else:
+        return "generic"
+
+
 def build_api_prompt_ref2v(scene_prompt, character_image_name, character2_image_name=None, width=864, height=480, duration=5.0, turbo=True, seed=None, steps=None, upscale=False, offload=False):
     """Erstellt ein reines ComfyUI-API-Payload für MiniMax H3 Ref2V (unterstützt 1 oder 2 Charakter-Referenzen)."""
     if seed is None:
@@ -1306,6 +1349,7 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
     rendered_scene_files = []
     scene_timings = []
     previous_last_frame_path = None
+    previous_scene_char_focus = None
     start_time = time.time()
 
     for idx, sc in enumerate(scenes, start=1):
@@ -1362,12 +1406,41 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
             log("Kein vorheriges Frame für I2V vorhanden -> wechsle automatisch zu Ref2V mit Charakter-Anker", "WARN")
             sc_type = "ref2v"
 
+        # Ermittle Hauptcharakter(e) der aktuellen Szene
+        current_char_focus = detect_scene_characters(sc, final_scene_prompt, has_char2=bool(character2_input_name))
+
+        # I2V Safety Guard: Verhindert Gesichts-Morphing / Geisterfratzen bei Charakterwechseln
+        if sc_type == "i2v" and previous_scene_char_focus and current_char_focus in ["char1_only", "char2_only"]:
+            if previous_scene_char_focus != current_char_focus and previous_scene_char_focus in ["char1_only", "char2_only"]:
+                log(f"⚠️ I2V-Sicherheitswächter: Szene {idx} wechselt Hauptfigur ({previous_scene_char_focus} -> {current_char_focus})!", "WARN")
+                log("   Last-Frame-Handoff würde Gesichter ineinander morphen! Erzwinge sauberen Kinoschnitt (Ref2V).", "WARN")
+                sc_type = "ref2v"
+
+        previous_scene_char_focus = current_char_focus
+
         if sc_type == "ref2v":
-            # Reference-to-Video: nutzt das/die Master-Charakterbild(er)
+            # Smart Reference Routing: Isoliere Einzelcharaktere für 100% konsistente Identität ohne Attention-Bleed
+            if current_char_focus == "char2_only" and character2_input_name:
+                active_ref0 = character2_input_name
+                active_ref1 = None
+                comfy_scene_prompt = re.sub(r"<picture\s*2>", "<Picture 1>", final_scene_prompt, flags=re.IGNORECASE)
+                log("🎬 Smart Routing: Solo-Szene für Charakter 2 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
+            elif current_char_focus == "both" and character2_input_name:
+                active_ref0 = character_input_name
+                active_ref1 = character2_input_name
+                comfy_scene_prompt = final_scene_prompt
+                log("🎬 Smart Routing: Multi-Charakter-Szene (Two-Shot) -> Beide Referenzen aktiv (<Picture 1> & <Picture 2>)", "INFO")
+            else:
+                active_ref0 = character_input_name
+                active_ref1 = None
+                comfy_scene_prompt = final_scene_prompt
+                if character2_input_name:
+                    log("🎬 Smart Routing: Solo-Szene für Charakter 1 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
+
             prompt_dict = build_api_prompt_ref2v(
-                scene_prompt=final_scene_prompt,
-                character_image_name=character_input_name,
-                character2_image_name=character2_input_name,
+                scene_prompt=comfy_scene_prompt,
+                character_image_name=active_ref0,
+                character2_image_name=active_ref1,
                 width=width,
                 height=height,
                 duration=duration,

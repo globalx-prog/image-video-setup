@@ -40,6 +40,7 @@ fi
 SELECTED_MP="0.6"
 SELECTED_STEPS="10"
 ENABLE_UPSCALE=true
+HARD_CUTS=true
 FAN_PROFILE="sweet-spot"
 FAN_MANAGED=false
 
@@ -122,6 +123,14 @@ while [[ $# -gt 0 ]]; do
             SELECTED_MP="$2"
             shift 2
             ;;
+        --smooth)
+            HARD_CUTS=false
+            shift
+            ;;
+        --hard-cuts)
+            HARD_CUTS=true
+            shift
+            ;;
         *)
             EXTRA_ARGS+=("$1")
             shift
@@ -191,6 +200,10 @@ CMD_ARGS=(
 
 if [ "$ENABLE_UPSCALE" = true ]; then
     CMD_ARGS+=(--upscale)
+fi
+
+if [ "$HARD_CUTS" = true ]; then
+    CMD_ARGS+=(--hard-cuts)
 fi
 
 if [ ${#EXTRA_ARGS[@]} -gt 0 ]; then
