@@ -424,10 +424,10 @@ Dein Rechner besitzt **48 GB VRAM**, **64 GB System-RAM** und **36 GB Swap**. De
 | **Checkpoints auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/checkpoints/` |
 | **Diffusionsmodelle auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/models/diffusion_models/` |
 | **Fertige Workflows auflisten** | `ls -lh /home/clemi/Projekte/LLM/image-video-setup/ComfyUI/user/default/workflows/` |
-| **VRAM sofort komplett leeren (1-Klick)** | `/home/clemi/Projekte/LLM/image-video-setup/free_vram.sh` |
-| **AMD GPU 60s-Watchdog Patch** | `sudo /home/clemi/Projekte/LLM/image-video-setup/apply_amd_gpu_fixes.sh` |
-| **MiniMax-H3 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_minimax_h3.sh` |
-| **Wan 2.1 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/download_wan.sh` |
+| **VRAM sofort komplett leeren (1-Klick)** | `/home/clemi/Projekte/LLM/image-video-setup/scripts/free_vram.sh` |
+| **AMD GPU 60s-Watchdog Patch** | `sudo /home/clemi/Projekte/LLM/image-video-setup/setup/02-apply-amd-gpu-fixes.sh` |
+| **Wan 2.2 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/setup/04-download-wan2.2-models.sh` |
+| **FLUX.2 Download starten** | `/home/clemi/Projekte/LLM/image-video-setup/setup/05-download-flux2-models.sh` |
 
 ---
 

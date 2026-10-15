@@ -1,0 +1,77 @@
+# ==============================================================================
+# 🎬 Krimi-Intro Drehbuch: "Schatten über der Stadt" (30 Sekunden / 6 Szenen)
+# ==============================================================================
+# 6 Szenen à 5 Sekunden = 30 Sekunden Gesamt-Intro
+#
+# Technologie-Mix für perfekte Konsistenz:
+# - Szene 1: Ref2V  -> Visueller Anker für Detective Cross (<Picture 1>)
+# - Szene 2: I2V    -> Nahtlose Weiterführung (Last-Frame-Handoff: Zippo & Zigarette)
+# - Szene 3: Ref2V  -> Kinoschnitt auf den Tatort mit Polizeiband
+# - Szene 4: I2V    -> Nahtloses Durchschreiten der Absperrung (Last-Frame-Handoff)
+# - Szene 5: Ref2V  -> Neuer Kamerawinkel (Over-the-shoulder: Limousine taucht auf)
+# - Szene 6: Ref2V  -> Dramatischer Hero Close-Up & Finale vor Titelleiste
+# ==============================================================================
+
+character_image: "ComfyUI/input/detective_portrait.png"
+style: "Moody classic 1950s Film Noir aesthetic, 35mm Eastman color practical film photography: heavy pouring rain under warm amber street lamps, atmospheric volumetric fog, dramatic chiaroscuro high contrast lighting, deep black shadows, wet reflective cobblestone streets, anamorphic lens flare, sharp realistic 8k textures."
+
+scenes:
+  # --- Szene 1 (0:00 - 0:05): Der Ankunft im Regen (Ref2V) ---
+  - id: 1
+    type: "ref2v"
+    action: >
+      Establishing wide shot: A dark, rain-soaked alleyway in 1950s Chicago with glowing vintage neon signs reflected in wet asphalt puddles.
+      <Picture 1> is Detective Cross, a rugged middle-aged private investigator wearing a drenched dark trenchcoat and a charcoal fedora tilted low.
+      He steps slowly out from the deep shadows of a brick tenement building, lifting his collar against the driving rain and scanning the quiet street.
+    camera: "Slow descending crane shot from the fire escape down towards the detective."
+    audio: "Heavy rain pouring on pavement, distant roll of thunder, lonely melancholic jazz trumpet melody echo in the dark."
+
+  # --- Szene 2 (0:05 - 0:10): Die Zigarette (I2V Last-Frame-Handoff) ---
+  - id: 2
+    type: "i2v"
+    action: >
+      Continuous uninterrupted motion: Detective Cross stops beneath the dim glow of an amber street lamp, produces a silver Zippo lighter and flicks the flint wheel.
+      A warm golden flame flickers to life, illuminating his determined, stubbled jaw and sharp eyes as he lights a cigarette.
+      A wisp of pale tobacco smoke curls into the wet night air.
+    camera: "Smooth dolly-in moving from medium shot to medium-close chest level."
+    audio: "Crisp metallic snap of the Zippo lighter opening, hiss of the flint spark, steady rhythmic hiss of pouring rain."
+
+  # --- Szene 3 (0:10 - 0:15): Der Tatort (Ref2V Kinoschnitt) ---
+  - id: 3
+    type: "ref2v"
+    action: >
+      Cinematic hard cut: Exterior of an old shadowy Victorian brownstone entryway cordoned off with fluttering yellow crime scene tape reading 'POLICE LINE DO NOT CROSS'.
+      On the wet stone stairs below, a shattered gold pocket watch lies immersed in rainwater.
+      <Picture 1> is Detective Cross, arriving at the scene, stepping heavily onto the wet stairs and staring down intently at the broken watch.
+    camera: "Low-angle Dutch tilt shot looking up from the rain puddle towards the detective."
+    audio: "Wind whipping the plastic police tape, distant police siren wailing across the city, muffled heavy footsteps on wet stone."
+
+  # --- Szene 4 (0:15 - 0:20): Die Absperrung (I2V Last-Frame-Handoff) ---
+  - id: 4
+    type: "i2v"
+    action: >
+      Continuous tracking motion: Detective Cross ducks slightly, lifts the yellow police tape with a black leather gloved hand, and steps past the threshold.
+      Suddenly, intense dual beam headlights from an approaching vehicle sweep across his silhouette and cast long dramatic shadows onto the brick facade behind him.
+    camera: "Dynamic tracking push-in following him beneath the yellow tape, tilting slightly."
+    audio: "Rustle of wet trenchcoat fabric, crunch of glass fragments beneath leather boots, sudden ominous tire screech on wet asphalt."
+
+  # --- Szene 5 (0:20 - 0:25): Die Limousine (Ref2V Neuer Winkel) ---
+  - id: 5
+    type: "ref2v"
+    action: >
+      Tense over-the-shoulder angle: From behind <Picture 1> Detective Cross's broad shoulders, a menacing sleek black 1949 Buick limousine emerges slowly through the street fog.
+      Its blinding round headlights slice through the rain directly towards him.
+      Detective Cross's hand smoothly unbuttons his trenchcoat and grips the handle of his snub-nosed revolver in the leather shoulder holster.
+    camera: "Slow, steady tracking shot moving forward over Detective Cross's right shoulder towards the idling limousine."
+    audio: "Low guttural rumble of a heavy V8 engine idling, metallic click of a revolver holster snap, rising dissonant cello chord building suspense."
+
+  # --- Szene 6 (0:25 - 0:30): Hero Close-Up & Cliffhanger (Ref2V) ---
+  - id: 6
+    type: "ref2v"
+    action: >
+      Dramatic hero close-up portrait: <Picture 1> Detective Cross stands unwavering in the headlight glare, cigarette resting between his lips with thin smoke rising past his face.
+      Raindrops drip from the brim of his fedora. His eyes narrow with calm, dangerous resolve, and a subtle grim smirk touches his mouth.
+      The wipers of the limousine sweep rhythmically in the background bokeh as the screen begins a slow fade to black for the opening title.
+    camera: "Intense centered macro close-up on Detective Cross's eyes and face, holding steady."
+    audio: "Sudden resonant orchestral brass swell, massive cinematic bass drop boom, transition into the iconic driving noir intro theme music."
+

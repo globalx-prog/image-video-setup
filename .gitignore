@@ -8,4 +8,9 @@ ComfyUI/
 *.log
 wget-log*
 __pycache__/
+output/
+*.mp4
+*.mkv
+*.webm
+
 

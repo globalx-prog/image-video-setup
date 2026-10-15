@@ -1,0 +1,37 @@
+# ==============================================================================
+# 🎬 Test-Drehbuch: Die Turmuhr-Werkstatt (3 Szenen, 15 Sekunden Gesamtfilm)
+# ==============================================================================
+# Demonstriert die hybride Charakter-Konsistenz:
+# - Szene 1: Ref2V (Visueller Anker mit character_master.png)
+# - Szene 2: I2V Handoff (Nahtlose Kamerabewegung aus dem letzten Frame von Szene 1)
+# - Szene 3: Ref2V (Neuer Kamerawinkel / Kinoschnitt mit Charakter-Treue)
+# ==============================================================================
+
+character_image: "ComfyUI/input/steampunk_mechanic_fox.png"
+style: "Cinematic dieselpunk fantasy look, 35mm practical film photography: moody atmospheric volumetric fog, warm brass lantern light, anamorphic lens flare, tactile brass textures, rich cinematic contrast."
+
+scenes:
+  - id: 1
+    type: "ref2v"
+    action: >
+      Cinematic fantasy look, 35mm film style: Dusty, cavernous interior of a massive Victorian clock tower with rotating brass cogs and shafts of dusty golden sunlight.
+      <Picture 1> is the clever young red fox in a leather mechanic's apron, wearing brass welding goggles on its forehead and holding a miniature oil can.
+      The fox carefully balances along a narrow wooden beam above the giant ticking pendulum, peering intently down at an oversized jammed gear.
+      Camera is a wide dynamic crane shot slowly descending from the rafters toward the fox.
+      Audio: heavy rhythmic clock ticking, deep mechanical clanking, whistling wind from outside the tower slats.
+
+  - id: 2
+    type: "i2v"
+    action: >
+      Continuous tracking motion: The fox leans down, touches the spout of the brass oil can to the jammed gear teeth, and clicks the thumb lever twice.
+      A droplet of golden oil glistens and falls, instantly unlocking the massive bronze cogs which jolt into smooth, rapid rotation with a shower of tiny sparks.
+      Camera smoothly pushes in closer alongside the fox, rotating slightly to capture the sudden dynamic motion of the wheels.
+      Audio: crisp mechanical click, hiss of escaping steam, resonant chime of released tension, triumphant brass horn swell in the soundtrack.
+
+  - id: 3
+    type: "ref2v"
+    action: >
+      Cinematic hero close-up angle: <Picture 1> is the spirited fox mechanic, leaning against a warm brass railing, wiping a streak of dark grease from its cheek with the back of a paw.
+      It pushes the brass goggles down over its eyes with a proud smirk and looks out through the giant glass clock face overlooking the sprawling, misty city below.
+      Camera holds a medium-close hero profile with glowing circular clock roman numerals framing the background in dreamy bokeh.
+      Audio: grand church bell tolling across the city, quiet steady hum of perfectly running gears, rich resolving orchestral chord.

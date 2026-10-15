@@ -1,0 +1,39 @@
+# ==============================================================================
+# 🎬 Test-Drehbuch (3 Szenen, 15 Sekunden Gesamtfilm)
+# ==============================================================================
+# Demonstriert die hybride Charakter-Konsistenz:
+# - Szene 1: Ref2V (Visueller Anker mit character_master.png)
+# - Szene 2: I2V Handoff (Nahtlose Kamerabewegung aus dem letzten Frame von Szene 1)
+# - Szene 3: Ref2V (Neuer Kamerawinkel / Kinoschnitt mit Charakter-Treue)
+# ==============================================================================
+
+character_image: "ComfyUI/input/YOTTEA-KREA-PRO (21).png"
+style: "Realistic live-action cinematic look, storybook film style: 35mm practical film photography, golden hour sunset rim light, anamorphic lens, warm lens flare, natural film grain, heartwarming finish."
+
+scenes:
+  - id: 1
+    type: "ref2v"
+    action: >
+      Realistic live-action cinematic look, storybook movie: 35mm film style, warm rustic cheese shop at golden hour.
+      <Picture 1> is the tiny brown mouse in a green tweed vest with a miniature leather backpack.
+      The mouse cautiously pushes open the heavy wooden shop door at floor level, stepping inside onto polished floorboards, eyes wide in wonder.
+      Camera is a low-angle tracking shot at mouse eye level.
+      Audio: shop door bell chimes softly, pitter-patter of tiny paws on wood, warm ambient acoustic room tone.
+
+  - id: 2
+    type: "i2v"
+    action: >
+      Continuous tracking motion: The tiny brown mouse trots forward across the polished wooden floorboards towards the illuminated glass counter.
+      It stops at the baseboard, standing on its hind legs and pointing excitedly with both paws up toward the giant golden wheel of Swiss cheese.
+      Camera smoothly tilts up and tracks forward.
+      Audio: tiny excited mouse squeaks, gentle rustling of tweed vest, soft warm acoustic melody swelling.
+
+  - id: 3
+    type: "ref2v"
+    action: >
+      Cinematic hero close-up angle: <Picture 1> is the charming brown mouse in the tweed vest.
+      The mouse proudly wraps both paws around a freshly wrapped miniature parcel of cheese tied with brown twine.
+      It hugs the cheese parcel securely to its chest, beaming a joyful smile directly into the camera.
+      Camera holds an intimate low-angle hero framing with rich golden hour bokeh.
+      Audio: satisfied happy squeak, paper crinkling of the cheese parcel, cheerful resolving acoustic chord.
+
