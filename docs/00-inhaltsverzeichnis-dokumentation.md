@@ -58,5 +58,6 @@ Die neuesten und fortgeschrittensten Optimierungen für maximale Qualität in mi
 | [`35-ki-video-upscaling-und-post-processing.md`](35-ki-video-upscaling-und-post-processing.md) | **KI-Video-Upscaling (Real-ESRGAN)** | Vollständige Post-Processing Pipeline: Entkoppeltes FP16-Upscaling auf W7800 (<2 GB VRAM), Supersampling 1080p/4K, FFmpeg-Streaming. |
 | [`36-film-regie-flow-logfile-und-swap-management.md`](36-film-regie-flow-logfile-und-swap-management.md) | **Film-Regie, Upscale-Verbindung & SWAP** | 3-Akt Dramaturgie gegen Ping-Pong-Cuts, automatische End-zu-End KI-Upscaling Pipeline, production.log & SWAP-Reclaim. |
 | [`37-comfyui-performance-gui-tuning-und-fluessiges-arbeiten.md`](37-comfyui-performance-gui-tuning-und-fluessiges-arbeiten.md) | **ComfyUI Performance & GUI-Tuning** | Beseitigung von Canvas-Lag (Straight Links), History-Cleanup, Linux Swappiness, DPM High und VRAM-Warmstart. |
+| [`38-perfekte-quellbild-vorbereitung-fuer-ki-video.md`](38-perfekte-quellbild-vorbereitung-fuer-ki-video.md) | **Perfekte Quellbild-Vorbereitung** | Bildausschnitt (Bust-Shot), Mimik, Licht, Freistellung, Pre-FaceDetailer (0.32 Denoise) & Dateiformate. |
 
 

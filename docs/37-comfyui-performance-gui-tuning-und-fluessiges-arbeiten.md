@@ -117,3 +117,4 @@ Auf der AMD Radeon PRO W7800 (RDNA 3, 205W–230W) gelten folgende realistische 
 - [x] GPU-Boost: **`w7800_perf_boost.sh sweet-spot`** (oder `adaptive`) aktiv.
 - [x] Langfilm-Pipeline: **`offload_between_scenes=False`** (VRAM-Warmstart aktiv).
 - [x] Linux: **`vm.swappiness=10`** gesetzt.
+
