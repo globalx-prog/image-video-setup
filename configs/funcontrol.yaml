@@ -1,0 +1,125 @@
+# ==============================================================================
+# 🎬 1-Minuten-Szenario: "Funcontrol"
+# ==============================================================================
+# Gesamtdauer: 60 Sekunden = Genau 12 Szenen à 5.0 Sekunden
+# Besetzung:
+#   <Picture 1> = Kira (sportliche Frau, muskulöse, athletische Statur, großer Busen, trägt nur einen roten Sport-BH)
+#   <Picture 2> = Lena (sportliche Frau, muskulöse, athletische Statur, großer Busen, trägt nur einen schwarzen Sport-BH)
+# Technologie-Mix:
+#   - Ref2V: Für fotorealistische Charakter-Konsistenz & Schuss-Gegenschuss Dialoge
+#   - I2V: Für nahtlose Plansequenzen, Kamera-Tracking und dynamische Action-Handoffs
+# ==============================================================================
+
+character_image: "ComfyUI/input/kira.png"
+character2_image: "ComfyUI/input/lena.png"
+master_style: "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: warm golden and soft pink volumetric lighting, shallow depth of field, anamorphic lens flares, photorealistic skin texture, 8k."
+
+scenes:
+  # --- Szene 1 (0:00 - 0:05): Das Studio (Ref2V) ---
+  - id: 1
+    type: "ref2v"
+    action: >
+      Bright modern studio with large windows, warm sunlight streaming through.
+      <Picture 1> Kira stands in the foreground, back to the viewer, arms relaxed at her sides.
+      Her red sports bra emphasizes her strong, athletic shoulders. She slowly turns to the side.
+    camera: "Slow rotation around the figure, from behind to the side."
+    audio: "Quiet ambient sound, soft background music."
+
+  # --- Szene 2 (0:05 - 0:10): Der Blick nach unten (Ref2V) ---
+  - id: 2
+    type: "ref2v"
+    action: >
+      <Picture 1> Kira now faces the viewer directly. Her chest musculature is strong and athletic under the red sports bra.
+      She breathes calmly, her gaze directed downward, pensive.
+    camera: "Static frontal shot, close-up of the upper body."
+    audio: "Steady breathing, faint humming."
+
+  # --- Szene 3 (0:10 - 0:15): Lena tritt ein (Ref2V) ---
+  - id: 3
+    type: "ref2v"
+    action: >
+      <Picture 2> Lena enters the frame from the left. She wears a black sports bra.
+      Her athletic, muscular build is strong. Her gaze meets Kira's, and a warm, searching smile settles on her lips.
+    camera: "Slow push-in, the two move closer together."
+    audio: "Soft, inviting music, the smile evokes warmth."
+
+  # --- Szene 4 (0:15 - 0:20): Das zärtliche Lächeln (Ref2V) ---
+  - id: 4
+    type: "ref2v"
+    action: >
+      <Picture 1> Kira raises her gaze to <Picture 2> Lena. A gentle, tender smile forms on her lips.
+      Her eyes grow soft and warm. Lena now stands directly before her, only half a meter away.
+    camera: "Tight two-shot, both faces in focus."
+    audio: "Silence, only faint breathing, the smile radiates warmth."
+
+  # --- Szene 5 (0:20 - 0:25): Die Hände an den Wangen (Ref2V) ---
+  - id: 5
+    type: "ref2v"
+    action: >
+      <Picture 1> Kira extends both arms and places her hands gently on <Picture 2> Lena's cheeks.
+      Her thumbs caress tenderly over Lena's cheekbones. Lena's eyes close briefly, a sighing, soft sound escapes her.
+    camera: "Close-up of the faces and hands, shallow depth of field."
+    audio: "Soft sighing, tender warmth, quiet music."
+
+  # --- Szene 6 (0:25 - 0:30): Die erwiderte Umarmung (Ref2V) ---
+  - id: 6
+    type: "ref2v"
+    action: >
+      <Picture 2> Lena returns the embrace. Her hands rest on <Picture 1> Kira's cheeks, thumbs caressing over Kira's forehead.
+      Both lean toward each other simultaneously. Their noses almost touch, breathing becomes faster and shallower.
+    camera: "Close-up, the two move even closer together."
+    audio: "Shallower, faster breathing, warming silence."
+
+  # --- Szene 7 (0:30 - 0:35): Der erste Kuss (Ref2V) ---
+  - id: 7
+    type: "ref2v"
+    action: >
+      Their lips touch. A gentle, tender kiss between <Picture 1> Kira and <Picture 2> Lena. Both close their eyes.
+      The touch is soft and affectionate, time seems to stand still. A warm, peaceful moment.
+    camera: "Close-up of the touching lips, shallow depth of field."
+    audio: "Silence, only faint breathing, deep warmth."
+
+  # --- Szene 8 (0:35 - 0:40): Die Zärtlichkeit (Ref2V) ---
+  - id: 8
+    type: "ref2v"
+    action: >
+      The kiss deepens. <Picture 1> Kira embraces <Picture 2> Lena tenderly and firmly.
+      Lena returns the embrace with equal tenderness. Both breathe shallower, holding each other closer.
+    camera: "Close-up of the two embracing, shallow depth of field."
+    audio: "Shallow, faster breathing, tender warmth, faint sighing."
+
+  # --- Szene 9 (0:40 - 0:45): Die leidenschaftliche Verschlingung (Ref2V) ---
+  - id: 9
+    type: "ref2v"
+    action: >
+      The kiss grows deeper, more passionate. <Picture 1> Kira pulls <Picture 2> Lena tighter to herself.
+      Her arms wrap around Lena's back. Lena grips Kira's shoulders, her fingers resting on the muscular tissue. Both tremble faintly.
+    camera: "Close-up of the interlocking arms and shoulders, shallow depth of field."
+    audio: "Shallow, trembling breathing, passionate warmth."
+
+  # --- Szene 10 (0:45 - 0:50): Der Rücken an der Brust (Ref2V) ---
+  - id: 10
+    type: "ref2v"
+    action: >
+      <Picture 1> Kira slowly turns. Her back now rests against <Picture 2> Lena's chest.
+      Lena's arms wrap firmly around Kira's waist, her hands resting against Kira's back. Kira breathes softly, eyes closed.
+    camera: "Close-up, shallow depth of field, warm golden lighting."
+    audio: "Faint trembling, sighing breath, deep warmth."
+
+  # --- Szene 11 (0:50 - 0:55): Der weiche Blick (Ref2V) ---
+  - id: 11
+    type: "ref2v"
+    action: >
+      <Picture 2> Lena slowly releases. She places her hands on <Picture 1> Kira's cheeks again.
+      Her gaze is soft, warm, tender. Kira returns the gaze, a gentle, calm smile. Both breathe heavily but peacefully.
+    camera: "Close-up of the faces, shallow depth of field."
+    audio: "Heavy, calming breath, tender warmth."
+
+  # --- Szene 12 (0:55 - 1:00): Die verbundenen Hände (Ref2V) ---
+  - id: 12
+    type: "ref2v"
+    action: >
+      <Picture 1> Kira and <Picture 2> Lena stand side by side in the warm studio sunlight.
+      Their hands are interlaced, fingers firmly gripped together. Both look forward, calm, peaceful. A final, warm moment of togetherness.
+    camera: "Slow pull-back, the two grow smaller in the frame, warm golden lighting."
+    audio: "Quiet, soft music fading slowly, deep peaceful warmth."

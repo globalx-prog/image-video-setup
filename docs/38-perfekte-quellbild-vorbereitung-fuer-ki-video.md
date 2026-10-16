@@ -83,3 +83,4 @@ Vor dem Start von `./scripts/run_1min_movie.sh`:
 - [x] Sind **Augen und Iris gestochen scharf** (keine verschwommenen Pupillen)?
 - [x] Ist die **Kleidung (Kragen/Jacke) klar erkennbar**?
 - [x] Liegt das Bild als saubere `.png`-Datei in `ComfyUI/input/`?
+

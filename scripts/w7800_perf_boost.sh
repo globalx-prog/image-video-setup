@@ -160,13 +160,16 @@ reset_defaults() {
 }
 
 dynamic_fan_curve() {
-    echo "🌡️ Starte dynamische Lüfterkurve (beenden mit Ctrl+C)..."
-    echo "   Kurve: <60°C Hotspot -> 40% (leise) | 60-72°C -> 60% | 73-82°C -> 75% | >82°C -> 85%"
+    echo "🌡️ Starte aggressive dynamische Lüfterkurve (beenden mit Ctrl+C)..."
+    echo "   Kurve: <50°C -> 40% | 50-59°C -> 55% | 60-69°C -> 70% | 70-79°C -> 85% | 80-84°C -> 95% | >=85°C -> 100% MAX"
     
     # Sicherstellen, dass bei Abbruch Automatik reaktiviert wird
     trap 'echo ""; echo "Beende Lüfterkurve und stelle Automatik wieder her..."; echo 2 > "$HWMON_DIR/pwm1_enable" 2>/dev/null; exit 0' INT TERM EXIT
 
-    echo 1 > "$HWMON_DIR/pwm1_enable" 2>/dev/null
+    if ! echo 1 > "$HWMON_DIR/pwm1_enable" 2>/dev/null; then
+        echo "❌ FEHLER: Konnte manuelle Lüfterkontrolle nicht aktivieren (Root/sudo erforderlich!)." >&2
+        exit 1
+    fi
 
     while true; do
         junc_raw=$(cat "$HWMON_DIR/temp2_input" 2>/dev/null || echo 0)
@@ -174,23 +177,32 @@ dynamic_fan_curve() {
         junc=$((junc_raw / 1000))
         edge=$((edge_raw / 1000))
 
-        # Berechne PWM Zielwert basierend auf Hotspot
-        if [ "$junc" -lt 55 ]; then
-            target_pwm=95   # ~37%
-        elif [ "$junc" -lt 65 ]; then
-            target_pwm=135  # ~53%
-        elif [ "$junc" -lt 75 ]; then
-            target_pwm=165  # ~65%
-        elif [ "$junc" -lt 83 ]; then
-            target_pwm=195  # ~76%
+        # Falls Junction Sensor 0 liefert, nutze Edge-Sensor als Fallback
+        ref_temp=$junc
+        if [ "$ref_temp" -le 0 ]; then
+            ref_temp=$edge
+        fi
+
+        # Aggressive Lüfterkurve: Verhindert Hotspot-Aufbau frühzeitig
+        # Bei 90°C / 95°C läuft der Lüfter garantiert auf 100% MAXIMUM (PWM 255)!
+        if [ "$ref_temp" -lt 50 ]; then
+            target_pwm=102  # ~40% (leise im Leerlauf)
+        elif [ "$ref_temp" -lt 60 ]; then
+            target_pwm=140  # ~55% (sanftes Anlaufen)
+        elif [ "$ref_temp" -lt 70 ]; then
+            target_pwm=178  # ~70% (aktive Lastkühlung, hält Hotspot stabil)
+        elif [ "$ref_temp" -lt 80 ]; then
+            target_pwm=217  # ~85% (starker Blower-Luftstrom gegen Hitzestau)
+        elif [ "$ref_temp" -lt 85 ]; then
+            target_pwm=242  # ~95% (sehr hohe Drehzahl)
         else
-            target_pwm=225  # ~88% Notfall-Kühlung
+            target_pwm=255  # 100% MAXIMUM (Volle Turbinenkraft bei Hotspot >=85°C, 90°C, 95°C!)
         fi
 
         echo "$target_pwm" > "$HWMON_DIR/pwm1" 2>/dev/null
         target_pct=$((target_pwm * 100 / 255))
         
-        printf "\r[W7800 Temp-Wächter] Hotspot: %2d°C | Edge: %2d°C | Lüfter: %2d%% (PWM %3d/255)" "$junc" "$edge" "$target_pct" "$target_pwm"
+        printf "\r[W7800 Temp-Wächter] Hotspot: %2d°C | Edge: %2d°C | Lüfter: %3d%% (PWM %3d/255)" "$junc" "$edge" "$target_pct" "$target_pwm"
         sleep 2
     done
 }

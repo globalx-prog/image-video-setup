@@ -18,10 +18,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT_DIR"
 
-STORY_FILE="configs/krimi_story_1min_kino_flow.yaml"
-OUTPUT_DIR="output/krimi_1min_kino_flow"
-CHAR1_IMG="ComfyUI/input/detective_cross.png"
-CHAR2_IMG="ComfyUI/input/elena_vance.png"
+STORY_FILE="configs/funcontrol.yaml"
+OUTPUT_DIR="output/funcontrol_$(date +%Y%m%d_%H%M%S)"
+CHAR1_IMG="ComfyUI/input/kira.png"
+CHAR2_IMG="ComfyUI/input/lena.png"
 
 # Prüfe und erstelle Symlinks zu vorhandenen Assets falls nötig
 if [ ! -f "$CHAR1_IMG" ]; then
@@ -54,8 +54,8 @@ if [ -t 0 ] && [ "$#" -eq 0 ]; then
 
     # --- 1. W7800 Lüfter & Kühlprofil ---
     echo "🌀 [1/3] W7800 LÜFTER- & POWER-PROFIL WÄHLEN:"
-    echo "   [1] 🌡️ Adaptive Kurve (Empfohlen): Regelt Lüfter live nach Hotspot-Temperatur"
-    echo "                              (<55°C: 37% | 55-65°C: 53% | 65-75°C: 65% | >75°C: 76%)"
+    echo "   [1] 🌡️ Adaptive Kurve (Empfohlen): Regelt Lüfter live & aggressiv nach Hotspot"
+    echo "                              (<50°C: 40% | 50-60°C: 55% | 60-70°C: 70% | 70-80°C: 85% | >=85°C: 100% MAX)"
     echo "   [2] 🌟 Sweet-Spot (Statisch): 205W, 55% Lüfter (~74°C, leise & kühl)"
     echo "   [3] 🚀 Performance-Boost:     230W, 65% Lüfter (max. Taktung, thermisch stabil)"
     echo "   [4] ❄️ Extreme-Cooling:       230W, 85% Lüfter (maximale Kühlung für Dauerlast)"
@@ -165,21 +165,31 @@ trap cleanup_fan_on_exit EXIT INT TERM
 if [ -f "scripts/w7800_perf_boost.sh" ] && [ "$FAN_PROFILE" != "auto" ]; then
     echo "🌀 Wende Lüfterprofil '$FAN_PROFILE' auf AMD Radeon PRO W7800 an..."
     if command -v sudo >/dev/null 2>&1; then
-        if [ "$FAN_PROFILE" = "adaptive" ] || [ "$FAN_PROFILE" = "fan-curve" ]; then
-            # Power-Limit auf 205W Sweet-Spot & Compute Profil setzen
-            sudo ./scripts/w7800_perf_boost.sh sweet-spot >/dev/null 2>&1 || true
-            # Starte dynamische Lüfterkurve im Hintergrund
-            sudo ./scripts/w7800_perf_boost.sh fan-curve >/dev/null 2>&1 &
-            FAN_PID=$!
-            FAN_MANAGED=true
-            echo "✅ Adaptive Lüfterkurve aktiv im Hintergrund (PID: $FAN_PID, regelt live nach Hotspot-Temperatur)."
-        else
-            if sudo ./scripts/w7800_perf_boost.sh $FAN_PROFILE; then
-                FAN_MANAGED=true
-                echo "✅ Lüfterprofil aktiv."
+        echo "🔑 Validiere sudo-Rechte für Hardware-Lüftersteuerung..."
+        if sudo -v; then
+            if [ "$FAN_PROFILE" = "adaptive" ] || [ "$FAN_PROFILE" = "fan-curve" ]; then
+                # Power-Limit auf 205W Sweet-Spot & Compute Profil setzen
+                sudo ./scripts/w7800_perf_boost.sh sweet-spot >/dev/null 2>&1 || true
+                # Starte dynamische Lüfterkurve im Hintergrund (mit Logging nach /tmp/w7800_fan.log)
+                sudo nohup ./scripts/w7800_perf_boost.sh fan-curve >/tmp/w7800_fan.log 2>&1 &
+                FAN_PID=$!
+                sleep 0.5
+                if kill -0 "$FAN_PID" 2>/dev/null; then
+                    FAN_MANAGED=true
+                    echo "✅ Aggressive adaptive Lüfterkurve aktiv im Hintergrund (PID: $FAN_PID, regelt live nach Hotspot)."
+                else
+                    echo "⚠️ Adaptive Lüfterkurve konnte nicht gestartet werden (Details in /tmp/w7800_fan.log)."
+                fi
             else
-                echo "⚠️ Konnte Lüfterprofil nicht setzen (Passwort-Prompt abgelehnt?). Fahre mit vBIOS fort."
+                if sudo ./scripts/w7800_perf_boost.sh $FAN_PROFILE; then
+                    FAN_MANAGED=true
+                    echo "✅ Lüfterprofil aktiv."
+                else
+                    echo "⚠️ Konnte Lüfterprofil nicht setzen."
+                fi
             fi
+        else
+            echo "⚠️ Sudo-Berechtigung verweigert oder abgebrochen. Fahre mit vBIOS-Automatik fort."
         fi
     fi
     echo ""
