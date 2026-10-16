@@ -545,38 +545,53 @@ def detect_scene_characters(sc, prompt_text, has_char2=False):
     Rückgabe: 'char1_only', 'char2_only', 'both', oder 'generic'
     Ermöglicht Smart Reference Routing (Solo-Isolation) zur Vermeidung von Attention-Bleed.
     """
-    # 1. Explizite Deklaration im Drehbuch / YAML falls vorhanden
+    if not has_char2:
+        return "char1_only"
+
+    # 1. Explizite Deklaration via visible_characters
+    vis = sc.get("visible_characters", sc.get("characters", []))
+    if isinstance(vis, list) and vis:
+        vis_str = " ".join(str(x).lower() for x in vis)
+        has_v1 = "<picture 1>" in vis_str or "cross" in vis_str or "char1" in vis_str or "detective" in vis_str or "kira" in vis_str
+        has_v2 = "<picture 2>" in vis_str or "elena" in vis_str or "char2" in vis_str or "lena" in vis_str
+        if has_v1 and has_v2:
+            return "both"
+        elif has_v2:
+            return "char2_only"
+        elif has_v1:
+            return "char1_only"
+
+    # 2. Explizite Deklaration via character
     if "character" in sc:
         c_val = str(sc["character"]).strip().lower()
-        if c_val in ["1", "char1", "cross", "detective"]:
+        if c_val in ["1", "char1", "cross", "detective", "kira"]:
             return "char1_only"
-        elif c_val in ["2", "char2", "elena"]:
+        elif c_val in ["2", "char2", "elena", "lena"]:
             return "char2_only"
         elif c_val in ["both", "1,2", "all", "duo", "two_shot"]:
             return "both"
 
-    if "characters" in sc:
-        c_list = [str(x).strip().lower() for x in sc["characters"]]
-        if ("1" in c_list or "char1" in c_list) and ("2" in c_list or "char2" in c_list):
-            return "both"
-        elif "2" in c_list or "char2" in c_list:
-            return "char2_only"
-        elif "1" in c_list or "char1" in c_list:
-            return "char1_only"
-
-    # 2. Token- und Namensanalyse im Prompt
+    # 3. Tag-Analyse (<Picture 1> vs <Picture 2>) im Prompt (höchste Priorität vor reinem Text)
     text_lower = prompt_text.lower()
-    has_pic1 = "<picture 1>" in text_lower or "detective cross" in text_lower or ("cross" in text_lower and "elena" not in text_lower)
-    has_pic2 = "<picture 2>" in text_lower or "elena vance" in text_lower or "elena" in text_lower
+    has_tag1 = "<picture 1>" in text_lower or "<picture1>" in text_lower
+    has_tag2 = "<picture 2>" in text_lower or "<picture2>" in text_lower
 
-    if not has_char2:
+    if has_tag1 and has_tag2:
+        return "both"
+    elif has_tag2 and not has_tag1:
+        return "char2_only"
+    elif has_tag1 and not has_tag2:
         return "char1_only"
 
-    if has_pic1 and has_pic2:
+    # 4. Fallback auf Namenssuche (falls keine Tags gesetzt sind)
+    has_name1 = "detective cross" in text_lower or "cross" in text_lower or "kira" in text_lower
+    has_name2 = "elena vance" in text_lower or "elena" in text_lower or "lena" in text_lower
+
+    if has_name1 and has_name2:
         return "both"
-    elif has_pic2 and not has_pic1:
+    elif has_name2:
         return "char2_only"
-    elif has_pic1 and not has_pic2:
+    elif has_name1:
         return "char1_only"
     else:
         return "generic"
@@ -903,7 +918,7 @@ def queue_prompt(prompt_dict, base_url, client_id=None):
         return res.get("prompt_id")
 
 
-def wait_for_prompt_completion(prompt_id, base_url, prompt_dict=None, scene_idx=None, total_scenes=None, gpu_tracker=None, status_tracker=None, timeout=1800):
+def wait_for_prompt_completion(prompt_id, base_url="http://127.0.0.1:8188", prompt_dict=None, scene_idx=None, total_scenes=None, gpu_tracker=None, status_tracker=None, timeout=2400):
     """Wartet auf das Fertigstellen des Prompts via Polling der History API und gibt alle 30s Status & Temperatur aus."""
     start_time = time.time()
     last_status_print = start_time
@@ -1253,18 +1268,19 @@ def print_production_report(total_scenes, duration, total_time, final_film, step
     print()
 
 
-def run_pipeline(story_file, character_image, output_dir, character2_image=None, width=864, height=480, duration=5.0, turbo=True, steps=None, upscale=False, hard_cuts=False, offload_between_scenes=False, comfy_url="http://127.0.0.1:8188", resume=True):
+def run_pipeline(story_file, character_image, output_dir, character2_image=None, width=864, height=480, duration=5.0, turbo=True, steps=None, upscale=False, hard_cuts=False, offload_between_scenes=False, comfy_url="http://127.0.0.1:8188", resume=True, rerun_scenes=None, concat_only=False):
     log("==================================================================", "INFO")
     log("🚀 Starte Auto Movie Maker — MiniMax H3 Langfilm-Pipeline", "INFO")
     log("==================================================================", "INFO")
 
-    if not check_comfy_live(comfy_url):
-        sys.exit(1)
+    if not concat_only:
+        if not check_comfy_live(comfy_url):
+            sys.exit(1)
 
-    # Pre-Flight: Einmalige Bereinigung vor Filmstart (bricht verwaiste Renderings ab & entlädt Altlasten)
-    log("Pre-Flight Bereinigung: Bringe ComfyUI in sauberen Zustand...", "INFO")
-    purge_comfyui_queue(comfy_url, interrupt_running=True)
-    free_comfy_memory(comfy_url, unload_models=True)
+        # Pre-Flight: Einmalige Bereinigung vor Filmstart (bricht verwaiste Renderings ab & entlädt Altlasten)
+        log("Pre-Flight Bereinigung: Bringe ComfyUI in sauberen Zustand...", "INFO")
+        purge_comfyui_queue(comfy_url, interrupt_running=True)
+        free_comfy_memory(comfy_url, unload_models=True)
 
     # Starte GPU-Telemetrie-Aufzeichnung für Temperatur & Energieverbrauch
     gpu_tracker = GPUTelemetryTracker(interval=1.0)
@@ -1326,8 +1342,17 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
     total_scenes = len(scenes)
     effective_steps = steps if steps is not None else (4 if turbo else 20)
 
+    # Parse explizite Rerun-Szenen
+    rerun_set = set()
+    if rerun_scenes:
+        for part in str(rerun_scenes).split(","):
+            part = part.strip()
+            if part.isdigit():
+                rerun_set.add(int(part))
+        if rerun_set:
+            log(f"🎯 Gezielter Rerun für Szenen angefordert: {sorted(list(rerun_set))}", "WARN")
+
     # Geschätzte Laufzeit-Kalkulation (basierend auf Benchmarks der AMD Radeon PRO W7800):
-    # MiniMax H3 32B DiT: ~32s pro Sampling-Schritt, ~85s Text-Conditioning & VAE-Decode
     sec_per_step = 32.0 if turbo else 34.0
     est_clip_render_sec = 85.0 + (effective_steps * sec_per_step) + (3.0 if upscale else 0.0)
     est_total_sec = 45.0 + (total_scenes * est_clip_render_sec) + 15.0
@@ -1336,15 +1361,17 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
     eta_str = eta_time.strftime("%H:%M:%S")
 
     log(f"Gesamtanzahl Szenen: {total_scenes} ({total_scenes * duration:.0f} Sekunden Film)", "INFO")
-    target_res = "1920x1080 Full HD (Lanczos3)" if upscale else f"{width}x{height}"
+    target_res = "1920x1080 Full HD (Real-ESRGAN)" if upscale else f"{width}x{height}"
     log(f"Konfiguration: Steps={effective_steps}, Turbo={turbo}, Upscale={upscale}, Zielauflösung={target_res}", "INFO")
     log(f"⏱️  Geschätzte Gesamtlaufzeit: ca. {est_total_min:.1f} Minuten ({total_scenes} Szenen à ~{est_clip_render_sec:.0f}s + End-Mastering)", "INFO")
     log(f"   Voraussichtliche Fertigstellung (ETA): ca. {eta_str} Uhr", "INFO")
 
-    # Starte ComfyUI WebSocket Status-Tracker für Live-Node & Fortschritt
-    client_id = f"auto_movie_{int(time.time())}"
-    status_tracker = ComfyUIStatusTracker(comfy_url, client_id)
-    status_tracker.start()
+    status_tracker = None
+    if not concat_only:
+        # Starte ComfyUI WebSocket Status-Tracker für Live-Node & Fortschritt
+        client_id = f"auto_movie_{int(time.time())}"
+        status_tracker = ComfyUIStatusTracker(comfy_url, client_id)
+        status_tracker.start()
 
     rendered_scene_files = []
     scene_timings = []
@@ -1352,38 +1379,49 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
     previous_scene_char_focus = None
     start_time = time.time()
 
-    for idx, sc in enumerate(scenes, start=1):
-        sc_id = sc.get("id", idx)
-        sc_type = sc.get("type", "ref2v").lower()
-        sc_action = sc.get("action", sc.get("prompt", ""))
-        sc_camera = sc.get("camera", "")
-        sc_audio = sc.get("audio", "")
+    if concat_only:
+        log("🎬 Modus --concat-only aktiv: Überspringe Generierung und füge vorhandene Szenen zusammen...", "INFO")
+        existing_scenes = sorted(glob.glob(os.path.join(output_dir, "szene_[0-9][0-9][0-9].mp4")))
+        if not existing_scenes:
+            log(f"Keine Szenen (szene_*.mp4) im Ordner {output_dir} gefunden!", "ERROR")
+            return
+        rendered_scene_files = existing_scenes
+        total_scenes = len(rendered_scene_files)
+        log(f"Gefundene native Szenen zum Zusammenfügen: {total_scenes}", "SUCCESS")
+    else:
+        for idx, sc in enumerate(scenes, start=1):
+            sc_id = sc.get("id", idx)
+            sc_type = sc.get("type", "ref2v").lower()
+            sc_action = sc.get("action", sc.get("prompt", ""))
+            sc_camera = sc.get("camera", "")
+            sc_audio = sc.get("audio", "")
 
-        local_scene_path = os.path.join(output_dir, f"szene_{idx:03d}.mp4")
-        upscaled_scene_path = os.path.join(output_dir, f"szene_{idx:03d}_1080p.mp4")
+            local_scene_path = os.path.join(output_dir, f"szene_{idx:03d}.mp4")
+            upscaled_scene_path = os.path.join(output_dir, f"szene_{idx:03d}_1080p.mp4")
 
-        # Resume-Prüfung: Falls Szene bereits gerendert vorliegt, überspringe sie
-        if resume and os.path.exists(local_scene_path) and os.path.getsize(local_scene_path) > 100000:
-            log(f"--- Szene [{idx}/{total_scenes}] (ID: {sc_id}, Modus: {sc_type}) ---", "SCENE")
-            log(f"Clip bereits gerendert ({local_scene_path}) -> Überspringe Rendering!", "SUCCESS")
-            last_frame_cache = os.path.join(output_dir, f"last_frame_sc{idx}.png")
-            if not os.path.exists(last_frame_cache):
-                try:
-                    extract_last_frame(local_scene_path, last_frame_cache)
-                except Exception:
-                    pass
-            previous_last_frame_path = last_frame_cache
+            force_rerun = bool(rerun_set and (idx in rerun_set or sc_id in rerun_set))
+            if force_rerun:
+                log(f"🎯 Gezielter Rerun für Szene {idx} (ID: {sc_id}) erzwungen! Entferne alte Versionen...", "WARN")
+                for old_f in [local_scene_path, upscaled_scene_path, os.path.join(output_dir, f"szene_{idx:03d}_ai_1080p.mp4")]:
+                    if os.path.exists(old_f):
+                        try:
+                            os.remove(old_f)
+                        except Exception:
+                            pass
 
-            if upscale:
-                if not os.path.exists(upscaled_scene_path) or os.path.getsize(upscaled_scene_path) < 100000:
+            # Resume-Prüfung: Falls Szene bereits gerendert vorliegt und kein Rerun erzwungen wird
+            if resume and not force_rerun and os.path.exists(local_scene_path) and os.path.getsize(local_scene_path) > 100000:
+                log(f"--- Szene [{idx}/{total_scenes}] (ID: {sc_id}, Modus: {sc_type}) ---", "SCENE")
+                log(f"Clip bereits gerendert ({local_scene_path}) -> Überspringe Rendering!", "SUCCESS")
+                last_frame_cache = os.path.join(output_dir, f"last_frame_sc{idx}.png")
+                if not os.path.exists(last_frame_cache):
                     try:
-                        upscale_video_ffmpeg(local_scene_path, upscaled_scene_path, width=1920, height=1080)
-                    except Exception as e:
-                        log(f"Upscaling für vorhandene Szene {idx} fehlgeschlagen: {e}", "WARN")
-                rendered_scene_files.append(upscaled_scene_path if os.path.exists(upscaled_scene_path) else local_scene_path)
-            else:
+                        extract_last_frame(local_scene_path, last_frame_cache)
+                    except Exception:
+                        pass
+                previous_last_frame_path = last_frame_cache
                 rendered_scene_files.append(local_scene_path)
-            continue
+                continue
 
         # 4-Track Prompt Enhancer Zusammenführung:
         prompt_parts = []
@@ -1525,7 +1563,8 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
         free_comfy_memory(comfy_url, unload_models=False)
 
     # Beende Status-Tracker & GPU-Telemetrie-Aufzeichnung
-    status_tracker.stop()
+    if status_tracker:
+        status_tracker.stop()
     gpu_tracker.stop()
     gpu_stats = gpu_tracker.get_summary()
 
@@ -1541,10 +1580,11 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
         log("🌟 Starte Post-Flight KI-Upscaling (Real-ESRGAN / AMD ROCm)...", "INFO")
         log("==================================================================", "INFO")
 
-        # Schritt A: Entlade 32B-Diffusionsmodell aus ComfyUI VRAM, damit 48 GB frei sind
-        log("Entlade Diffusionsmodell aus ComfyUI VRAM für maximale Upscale-Performance...", "INFO")
-        free_comfy_memory(comfy_url, unload_models=True)
-        time.sleep(2)
+        # Schritt A: Entlade 32B-Diffusionsmodell aus ComfyUI VRAM, falls geladen
+        if not concat_only:
+            log("Entlade Diffusionsmodell aus ComfyUI VRAM für maximale Upscale-Performance...", "INFO")
+            free_comfy_memory(comfy_url, unload_models=True)
+            time.sleep(2)
 
         # Schritt B: Führe ai_video_upscaler.py auf allen Szenen im output_dir aus
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1593,8 +1633,9 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
             shutil.copy2(native_film, final_film)
 
     # Post-Flight Bereinigung: Gebe gesamten VRAM für Desktop frei
-    log("Post-Flight Bereinigung: Gebe gesamten VRAM für Desktop & andere Modelle frei...", "INFO")
-    free_comfy_memory(comfy_url, unload_models=True)
+    if not concat_only:
+        log("Post-Flight Bereinigung: Gebe gesamten VRAM für Desktop & andere Modelle frei...", "INFO")
+        free_comfy_memory(comfy_url, unload_models=True)
 
     # Post-Flight Systembereinigung (RAM, glibc, Caches & SWAP leeren gegen System-Stocken)
     cleanup_system_ram_and_swap()
@@ -1636,7 +1677,8 @@ def main():
     parser.add_argument("--no-turbo", action="store_true", help="Deaktiviert Turbo LoRA (nutzt 20 Steps)")
     parser.add_argument("--hard-cuts", action="store_true", help="Deaktiviert weiche Kino-Überblendungen (nutzt harte Concat-Stream-Cuts)")
     parser.add_argument("--offload-between-scenes", action="store_true", help="Erzwingt Modell-Entladung nach jeder Szene (Standard: False, Modelle bleiben für max. Speed warm im VRAM)")
-    parser.add_argument("--no-resume", action="store_true", help="Deaktiviert das Überspringen bereits vorhandener Szenen (erzwingt Neurendern)")
+    parser.add_argument("--rerun-scenes", default=None, help="Kommaseparierte Liste von Szenen (z.B. '4' oder '4,7'), die gezielt neu gerendert werden sollen")
+    parser.add_argument("--concat-only", action="store_true", help="Überspringt Generierung und fügt vorhandene Szenen neu zusammen")
     parser.add_argument("--comfy-url", default="http://127.0.0.1:8188", help="ComfyUI URL")
 
     args = parser.parse_args()
@@ -1680,7 +1722,9 @@ def main():
             hard_cuts=args.hard_cuts,
             offload_between_scenes=args.offload_between_scenes,
             comfy_url=args.comfy_url,
-            resume=not args.no_resume
+            resume=True,
+            rerun_scenes=args.rerun_scenes,
+            concat_only=args.concat_only
         )
     finally:
         dual_logger.write_summary()

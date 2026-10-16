@@ -18,10 +18,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT_DIR"
 
-STORY_FILE="configs/funcontrol.yaml"
-OUTPUT_DIR="output/funcontrol_$(date +%Y%m%d_%H%M%S)"
-CHAR1_IMG="ComfyUI/input/kira.png"
-CHAR2_IMG="ComfyUI/input/lena.png"
+STORY_FILE="configs/krimi_story_1min_2personen.yaml"
+OUTPUT_DIR=""
+CHAR1_IMG="ComfyUI/input/detective_cross.png"
+CHAR2_IMG="ComfyUI/input/elena_vance.png"
 
 # Prüfe und erstelle Symlinks zu vorhandenen Assets falls nötig
 if [ ! -f "$CHAR1_IMG" ]; then
@@ -44,6 +44,7 @@ HARD_CUTS=true
 FAN_PROFILE="adaptive"
 FAN_MANAGED=false
 FAN_PID=""
+SUDO_KEEPALIVE_PID=""
 
 # Interaktive Abfrage nur wenn Terminal aktiv ist und keine Flags übergeben wurden
 if [ -t 0 ] && [ "$#" -eq 0 ]; then
@@ -107,6 +108,26 @@ fi
 EXTRA_ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --story)
+            STORY_FILE="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        --character)
+            CHAR1_IMG="$2"
+            shift 2
+            ;;
+        --character2)
+            CHAR2_IMG="$2"
+            shift 2
+            ;;
+        --steps)
+            SELECTED_STEPS="$2"
+            shift 2
+            ;;
         --fan)
             FAN_PROFILE="$2"
             shift 2
@@ -139,6 +160,14 @@ while [[ $# -gt 0 ]]; do
             HARD_CUTS=true
             shift
             ;;
+        --rerun-scenes)
+            EXTRA_ARGS+=(--rerun-scenes "$2")
+            shift 2
+            ;;
+        --concat-only)
+            EXTRA_ARGS+=(--concat-only)
+            shift
+            ;;
         *)
             EXTRA_ARGS+=("$1")
             shift
@@ -146,17 +175,36 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [ -z "$OUTPUT_DIR" ]; then
+    STORY_BASE=$(basename "$STORY_FILE" | sed 's/\.[^.]*$//')
+    OUTPUT_DIR="output/${STORY_BASE}_$(date +%Y%m%d_%H%M%S)"
+fi
+
+# Sudo-Keepalive im Hintergrund starten (verhindert Passwortabfragen bei langen Runs)
+start_sudo_keepalive() {
+    (
+        while true; do
+            sudo -n true 2>/dev/null || exit 0
+            sleep 60
+        done
+    ) &
+    SUDO_KEEPALIVE_PID=$!
+}
+
 # Sicherheits-Trap: Bei Skriptende oder Abbruch (Ctrl+C) Hintergrund-Prozess stoppen & Lüfter auf Automatik
 cleanup_fan_on_exit() {
+    if [ -n "$SUDO_KEEPALIVE_PID" ]; then
+        kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    fi
     if [ -n "$FAN_PID" ]; then
         echo ""
         echo "🛑 Beende adaptive Lüfterkurve (PID: $FAN_PID)..."
-        sudo kill "$FAN_PID" 2>/dev/null || true
+        sudo -n kill "$FAN_PID" 2>/dev/null || kill "$FAN_PID" 2>/dev/null || true
         wait "$FAN_PID" 2>/dev/null || true
     fi
     if [ "$FAN_MANAGED" = true ] && [ -f "scripts/w7800_perf_boost.sh" ]; then
         echo "🌀 Setze W7800 Lüftersteuerung sicher zurück auf vBIOS-Automatik..."
-        sudo ./scripts/w7800_perf_boost.sh auto >/dev/null 2>&1 || true
+        sudo -n ./scripts/w7800_perf_boost.sh auto >/dev/null 2>&1 || true
     fi
 }
 trap cleanup_fan_on_exit EXIT INT TERM
@@ -167,6 +215,7 @@ if [ -f "scripts/w7800_perf_boost.sh" ] && [ "$FAN_PROFILE" != "auto" ]; then
     if command -v sudo >/dev/null 2>&1; then
         echo "🔑 Validiere sudo-Rechte für Hardware-Lüftersteuerung..."
         if sudo -v; then
+            start_sudo_keepalive
             if [ "$FAN_PROFILE" = "adaptive" ] || [ "$FAN_PROFILE" = "fan-curve" ]; then
                 # Power-Limit auf 205W Sweet-Spot & Compute Profil setzen
                 sudo ./scripts/w7800_perf_boost.sh sweet-spot >/dev/null 2>&1 || true
@@ -218,6 +267,7 @@ fi
 export TORCH_BLAS_PREFER_HIPBLASLT=1
 export AMD_SERIALIZE_KERNEL=0
 export HSA_OVERRIDE_GFX_VERSION=11.0.0
+export PYTORCH_HIP_ALLOC_CONF="garbage_collection_threshold:0.8,max_split_size_mb:512"
 
 # Baue Aufruf-Argumente
 CMD_ARGS=(
