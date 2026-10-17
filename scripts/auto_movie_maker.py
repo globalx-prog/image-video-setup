@@ -1433,144 +1433,144 @@ def run_pipeline(story_file, character_image, output_dir, character2_image=None,
                 rendered_scene_files.append(local_scene_path)
                 continue
 
-        # 4-Track Prompt Enhancer Zusammenführung:
-        prompt_parts = []
-        if master_style and master_style not in sc_action:
-            prompt_parts.append(master_style)
-        prompt_parts.append(sc_action)
-        if sc_camera and sc_camera not in sc_action:
-            prompt_parts.append(f"Camera: {sc_camera}")
-        if sc_audio and sc_audio not in sc_action:
-            prompt_parts.append(f"Audio: {sc_audio}")
-        final_scene_prompt = ", ".join(p.strip() for p in prompt_parts if p.strip())
+            # 4-Track Prompt Enhancer Zusammenführung:
+            prompt_parts = []
+            if master_style and master_style not in sc_action:
+                prompt_parts.append(master_style)
+            prompt_parts.append(sc_action)
+            if sc_camera and sc_camera not in sc_action:
+                prompt_parts.append(f"Camera: {sc_camera}")
+            if sc_audio and sc_audio not in sc_action:
+                prompt_parts.append(f"Audio: {sc_audio}")
+            final_scene_prompt = ", ".join(p.strip() for p in prompt_parts if p.strip())
 
-        log(f"--- Szene [{idx}/{total_scenes}] (ID: {sc_id}, Modus: {sc_type}) ---", "SCENE")
-        log(f"Prompt: {final_scene_prompt[:120]}...", "INFO")
-        gpu_tracker.set_scene(f"Szene {idx:02d} (ID: {sc_id})")
-        check_vram_guard(comfy_url, min_free_gb=8.0)
+            log(f"--- Szene [{idx}/{total_scenes}] (ID: {sc_id}, Modus: {sc_type}) ---", "SCENE")
+            log(f"Prompt: {final_scene_prompt[:120]}...", "INFO")
+            gpu_tracker.set_scene(f"Szene {idx:02d} (ID: {sc_id})")
+            check_vram_guard(comfy_url, min_free_gb=8.0)
 
-        # Wenn I2V gewählt ist, aber noch kein Vor-Frame existiert -> Fallback auf Ref2V
-        if sc_type == "i2v" and not previous_last_frame_path:
-            log("Kein vorheriges Frame für I2V vorhanden -> wechsle automatisch zu Ref2V mit Charakter-Anker", "WARN")
-            sc_type = "ref2v"
-
-        # Ermittle Hauptcharakter(e) der aktuellen Szene
-        current_char_focus = detect_scene_characters(sc, final_scene_prompt, has_char2=bool(character2_input_name))
-
-        # I2V Safety Guard: Verhindert Gesichts-Morphing / Geisterfratzen bei Charakterwechseln
-        if sc_type == "i2v" and previous_scene_char_focus and current_char_focus in ["char1_only", "char2_only"]:
-            if previous_scene_char_focus != current_char_focus and previous_scene_char_focus in ["char1_only", "char2_only"]:
-                log(f"⚠️ I2V-Sicherheitswächter: Szene {idx} wechselt Hauptfigur ({previous_scene_char_focus} -> {current_char_focus})!", "WARN")
-                log("   Last-Frame-Handoff würde Gesichter ineinander morphen! Erzwinge sauberen Kinoschnitt (Ref2V).", "WARN")
+            # Wenn I2V gewählt ist, aber noch kein Vor-Frame existiert -> Fallback auf Ref2V
+            if sc_type == "i2v" and not previous_last_frame_path:
+                log("Kein vorheriges Frame für I2V vorhanden -> wechsle automatisch zu Ref2V mit Charakter-Anker", "WARN")
                 sc_type = "ref2v"
 
-        previous_scene_char_focus = current_char_focus
+            # Ermittle Hauptcharakter(e) der aktuellen Szene
+            current_char_focus = detect_scene_characters(sc, final_scene_prompt, has_char2=bool(character2_input_name))
 
-        if sc_type == "ref2v":
-            # Smart Reference Routing: Isoliere Einzelcharaktere für 100% konsistente Identität ohne Attention-Bleed
-            if current_char_focus == "char2_only" and character2_input_name:
-                active_ref0 = character2_input_name
-                active_ref1 = None
-                comfy_scene_prompt = re.sub(r"<picture\s*2>", "<Picture 1>", final_scene_prompt, flags=re.IGNORECASE)
-                log("🎬 Smart Routing: Solo-Szene für Charakter 2 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
-            elif current_char_focus == "both" and character2_input_name:
-                active_ref0 = character_input_name
-                active_ref1 = character2_input_name
-                comfy_scene_prompt = final_scene_prompt
-                log("🎬 Smart Routing: Multi-Charakter-Szene (Two-Shot) -> Beide Referenzen aktiv (<Picture 1> & <Picture 2>)", "INFO")
+            # I2V Safety Guard: Verhindert Gesichts-Morphing / Geisterfratzen bei Charakterwechseln
+            if sc_type == "i2v" and previous_scene_char_focus and current_char_focus in ["char1_only", "char2_only"]:
+                if previous_scene_char_focus != current_char_focus and previous_scene_char_focus in ["char1_only", "char2_only"]:
+                    log(f"⚠️ I2V-Sicherheitswächter: Szene {idx} wechselt Hauptfigur ({previous_scene_char_focus} -> {current_char_focus})!", "WARN")
+                    log("   Last-Frame-Handoff würde Gesichter ineinander morphen! Erzwinge sauberen Kinoschnitt (Ref2V).", "WARN")
+                    sc_type = "ref2v"
+
+            previous_scene_char_focus = current_char_focus
+
+            if sc_type == "ref2v":
+                # Smart Reference Routing: Isoliere Einzelcharaktere für 100% konsistente Identität ohne Attention-Bleed
+                if current_char_focus == "char2_only" and character2_input_name:
+                    active_ref0 = character2_input_name
+                    active_ref1 = None
+                    comfy_scene_prompt = re.sub(r"<picture\s*2>", "<Picture 1>", final_scene_prompt, flags=re.IGNORECASE)
+                    log("🎬 Smart Routing: Solo-Szene für Charakter 2 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
+                elif current_char_focus == "both" and character2_input_name:
+                    active_ref0 = character_input_name
+                    active_ref1 = character2_input_name
+                    comfy_scene_prompt = final_scene_prompt
+                    log("🎬 Smart Routing: Multi-Charakter-Szene (Two-Shot) -> Beide Referenzen aktiv (<Picture 1> & <Picture 2>)", "INFO")
+                else:
+                    active_ref0 = character_input_name
+                    active_ref1 = None
+                    comfy_scene_prompt = final_scene_prompt
+                    if character2_input_name:
+                        log("🎬 Smart Routing: Solo-Szene für Charakter 1 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
+
+                prompt_dict = build_api_prompt_ref2v(
+                    scene_prompt=comfy_scene_prompt,
+                    character_image_name=active_ref0,
+                    character2_image_name=active_ref1,
+                    width=width,
+                    height=height,
+                    duration=duration,
+                    turbo=turbo,
+                    steps=effective_steps,
+                    upscale=upscale,
+                    offload=offload_between_scenes
+                )
             else:
-                active_ref0 = character_input_name
-                active_ref1 = None
-                comfy_scene_prompt = final_scene_prompt
-                if character2_input_name:
-                    log("🎬 Smart Routing: Solo-Szene für Charakter 1 -> Isoliere Referenz (0% Attention-Bleed)", "INFO")
+                # Image-to-Video: Last-Frame-Handoff
+                last_frame_input_name = f"handoff_frame_sc{idx-1}.png"
+                shutil_dest = os.path.join(comfy_input_root, last_frame_input_name)
+                import shutil
+                shutil.copy2(previous_last_frame_path, shutil_dest)
 
-            prompt_dict = build_api_prompt_ref2v(
-                scene_prompt=comfy_scene_prompt,
-                character_image_name=active_ref0,
-                character2_image_name=active_ref1,
-                width=width,
-                height=height,
-                duration=duration,
-                turbo=turbo,
-                steps=effective_steps,
-                upscale=upscale,
-                offload=offload_between_scenes
+                prompt_dict = build_api_prompt_i2v(
+                    scene_prompt=final_scene_prompt,
+                    start_image_name=last_frame_input_name,
+                    width=width,
+                    height=height,
+                    duration=duration,
+                    turbo=turbo,
+                    steps=effective_steps,
+                    upscale=upscale,
+                    offload=offload_between_scenes
+                )
+
+            # Sende an ComfyUI
+            status_tracker.reset_prompt()
+            p_id = queue_prompt(prompt_dict, comfy_url, client_id=client_id)
+            status_tracker.set_active_prompt(p_id)
+            log(f"Prompt an ComfyUI übergeben (ID: {p_id}). Rendere Szene...", "INFO")
+
+            t_scene_start = time.time()
+            subfolder, filename = wait_for_prompt_completion(
+                prompt_id=p_id,
+                base_url=comfy_url,
+                prompt_dict=prompt_dict,
+                scene_idx=idx,
+                total_scenes=total_scenes,
+                gpu_tracker=gpu_tracker,
+                status_tracker=status_tracker
             )
-        else:
-            # Image-to-Video: Last-Frame-Handoff
-            last_frame_input_name = f"handoff_frame_sc{idx-1}.png"
-            shutil_dest = os.path.join(comfy_input_root, last_frame_input_name)
+            scene_elapsed = time.time() - t_scene_start
+            generated_clip = os.path.join(comfy_output_root, subfolder, filename)
+
+            # Speichere Szene in Zielordner (native Auflösung)
+            local_scene_path = os.path.join(output_dir, f"szene_{idx:03d}.mp4")
             import shutil
-            shutil.copy2(previous_last_frame_path, shutil_dest)
+            shutil.copy2(generated_clip, local_scene_path)
+            log(f"Szene {idx} erfolgreich gespeichert: {local_scene_path}", "SUCCESS")
 
-            prompt_dict = build_api_prompt_i2v(
-                scene_prompt=final_scene_prompt,
-                start_image_name=last_frame_input_name,
-                width=width,
-                height=height,
-                duration=duration,
-                turbo=turbo,
-                steps=effective_steps,
-                upscale=upscale,
-                offload=offload_between_scenes
-            )
+            # Protokolliere Clip-Timing & gebe Zwischenbericht aus
+            scene_timings.append({
+                "idx": idx,
+                "id": sc_id,
+                "type": sc_type,
+                "duration_s": scene_elapsed
+            })
+            total_clips_s = sum(st["duration_s"] for st in scene_timings)
+            avg_clip_s = total_clips_s / len(scene_timings)
+            remaining_count = total_scenes - idx
+            est_rem_s = remaining_count * avg_clip_s
 
-        # Sende an ComfyUI
-        status_tracker.reset_prompt()
-        p_id = queue_prompt(prompt_dict, comfy_url, client_id=client_id)
-        status_tracker.set_active_prompt(p_id)
-        log(f"Prompt an ComfyUI übergeben (ID: {p_id}). Rendere Szene...", "INFO")
+            log(f"🎬 Zwischenbericht: Szene [{idx}/{total_scenes}] in {scene_elapsed:.1f}s fertiggestellt!", "INFO")
+            log(f"   • Reine Clip-Renderzeit bisher: {total_clips_s:.1f}s ({total_clips_s/60:.1f} Min) | Ø {avg_clip_s:.1f}s pro Szene", "INFO")
+            if remaining_count > 0:
+                log(f"   • Verbleibend: {remaining_count} Szenen (geschätzte Restzeit: ca. {est_rem_s/60:.1f} Min)", "INFO")
 
-        t_scene_start = time.time()
-        subfolder, filename = wait_for_prompt_completion(
-            prompt_id=p_id,
-            base_url=comfy_url,
-            prompt_dict=prompt_dict,
-            scene_idx=idx,
-            total_scenes=total_scenes,
-            gpu_tracker=gpu_tracker,
-            status_tracker=status_tracker
-        )
-        scene_elapsed = time.time() - t_scene_start
-        generated_clip = os.path.join(comfy_output_root, subfolder, filename)
+            # Extrahiere letzten Frame für möglichen nächsten Handoff (vom nativen Clip)
+            last_frame_cache = os.path.join(output_dir, f"last_frame_sc{idx}.png")
+            try:
+                extract_last_frame(local_scene_path, last_frame_cache)
+                previous_last_frame_path = last_frame_cache
+            except Exception as e:
+                log(f"Fehler beim Extrahieren des letzten Frames: {e}", "WARN")
 
-        # Speichere Szene in Zielordner (native Auflösung)
-        local_scene_path = os.path.join(output_dir, f"szene_{idx:03d}.mp4")
-        import shutil
-        shutil.copy2(generated_clip, local_scene_path)
-        log(f"Szene {idx} erfolgreich gespeichert: {local_scene_path}", "SUCCESS")
+            # Speichere nativen Clip für die Zusammenfügung
+            rendered_scene_files.append(local_scene_path)
 
-        # Protokolliere Clip-Timing & gebe Zwischenbericht aus
-        scene_timings.append({
-            "idx": idx,
-            "id": sc_id,
-            "type": sc_type,
-            "duration_s": scene_elapsed
-        })
-        total_clips_s = sum(st["duration_s"] for st in scene_timings)
-        avg_clip_s = total_clips_s / len(scene_timings)
-        remaining_count = total_scenes - idx
-        est_rem_s = remaining_count * avg_clip_s
-
-        log(f"🎬 Zwischenbericht: Szene [{idx}/{total_scenes}] in {scene_elapsed:.1f}s fertiggestellt!", "INFO")
-        log(f"   • Reine Clip-Renderzeit bisher: {total_clips_s:.1f}s ({total_clips_s/60:.1f} Min) | Ø {avg_clip_s:.1f}s pro Szene", "INFO")
-        if remaining_count > 0:
-            log(f"   • Verbleibend: {remaining_count} Szenen (geschätzte Restzeit: ca. {est_rem_s/60:.1f} Min)", "INFO")
-
-        # Extrahiere letzten Frame für möglichen nächsten Handoff (vom nativen Clip)
-        last_frame_cache = os.path.join(output_dir, f"last_frame_sc{idx}.png")
-        try:
-            extract_last_frame(local_scene_path, last_frame_cache)
-            previous_last_frame_path = last_frame_cache
-        except Exception as e:
-            log(f"Fehler beim Extrahieren des letzten Frames: {e}", "WARN")
-
-        # Speichere nativen Clip für die Zusammenfügung
-        rendered_scene_files.append(local_scene_path)
-
-        # VRAM-Schutz: Freigabebefehl an ComfyUI senden
-        free_comfy_memory(comfy_url, unload_models=False)
+            # VRAM-Schutz: Freigabebefehl an ComfyUI senden
+            free_comfy_memory(comfy_url, unload_models=False)
 
     # Beende Status-Tracker & GPU-Telemetrie-Aufzeichnung
     if status_tracker:
