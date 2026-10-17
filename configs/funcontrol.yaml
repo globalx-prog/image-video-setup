@@ -107,11 +107,9 @@ scenes:
 - id: 12
   type: "ref2v"
   action: >
-    <Picture 1> Kira and <Picture 2> Lena stand side by side. Their hands are interlaced, fingers firmly gripped together. Both look forward, calm, peaceful. A final, warm moment of silent togetherness.
-    camera: "Slow pull-back, the two grow smaller in the frame, warm golden lighting."
-    audio: "Quiet, soft music fading slowly, deep peaceful warmth."
-
-    # 🎬 Szenen 13–24
+    <Picture 2> Lena slowly releases. She places her hands on <Picture 1> Kira's cheeks again. Her gaze is soft, warm, tender. <Picture 1> Kira returns the gaze, a gentle, calm smile. Both breathe heavily but peacefully.
+    camera: "Close-up of the faces, shallow depth of field."
+    audio: "Heavy, calming breath, tender warmth."
 
 # --- Szene 13 (0:00 - 0:05): Der Kuss vertieft sich (Ref2V) ---
 - id: 13

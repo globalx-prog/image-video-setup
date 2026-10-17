@@ -486,18 +486,28 @@ def decompose_text_with_ollama(text_path, model="qwen3.8-27b-q4", character_desc
     with open(text_path, "r", encoding="utf-8") as f:
         story_text = f.read()
 
-    system_prompt = f"""You are a professional film director and screenwriter for AI video generation with MiniMax H3.
-The main character is: {character_desc}.
+    system_prompt = f"""You are a world-class AI film director and screenwriter for MiniMax H3.
+Main character (<Picture 1>): {character_desc}.
 Your task is to break down the user's story into numbered, consecutive 5-second cinematic shots.
-For each shot, specify:
-1. "id": integer shot number starting from 1
-2. "type": "ref2v" for camera cuts / angle changes (references character image), or "i2v" for continuous camera pans / direct continuation from previous frame.
-3. "action": detailed visual prompt, camera angle, lighting, and ambient sound effects for MiniMax H3. Use <Picture 1> to refer to the main character when type is "ref2v".
+
+CRITICAL RULES:
+1. Strict Temporal Progression: Every shot MUST advance time forward. NEVER loop or repeat an action from the previous shot.
+   - Shot N: Trigger / Action (e.g., throwing a glowing device).
+   - Shot N+1: Immediate consequence (e.g., catching or evading the device, realizing the diversion).
+2. Explicit Character Tagging: In every shot, use <Picture 1> (and <Picture 2> if a second character is present) to identify the person.
+3. 100% Ref2V: Use "type": "ref2v" for camera cuts and character shots.
+4. Rich Sound Design: Specify cinematic ambient audio, foley, dialogue, and musical accents.
 
 Return ONLY a valid JSON array of objects without markdown formatting:
 [
-  {{"id": 1, "type": "ref2v", "action": "..."}},
-  {{"id": 2, "type": "i2v", "action": "..."}}
+  {{
+    "id": 1,
+    "type": "ref2v",
+    "visible_characters": ["Main Character (<Picture 1>)"],
+    "action": "...",
+    "camera": "...",
+    "audio": "..."
+  }}
 ]"""
 
     req_data = {

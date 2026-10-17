@@ -109,3 +109,4 @@ Wenn du Szenen extern nachbearbeitet hast, ein Audiobett austauschen willst oder
 > [!TIP]
 > **Wichtig für maximale Bildschärfe:**
 > Verwende bei Turbo-LoRA **4 bis maximal 6 Steps** (nicht 10 Steps). Turbo-LoRAs sind Destillationen; bei 10 Steps verfünffacht sich die Renderzeit ohne Detailgewinn. Echte 1080p-Mikroschärfe entsteht durch das Post-Flight **Real-ESRGAN SSAA** (4x Neural Super-Resolution mit Unsharp-Maske).
+
