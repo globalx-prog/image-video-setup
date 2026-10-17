@@ -1,151 +1,75 @@
 # ==============================================================================
-# 🎬 MASTER-VORLAGE: Multi-Charakter KI-Film Drehbuch (5.0s pro Szene)
+# 🎬 UNIVERSAL-TEMPLATE: KI-Film Drehbuch (Stil-, Format- & Struktur-Vorlage)
 # ==============================================================================
-# Anweisungen:
-# 1. Ersetze die Bildpfade bei character_image & character2_image
-# 2. Passe master_style an das gewünschte Genre an (Kamera, Licht, Look)
-# 3. Definiere die Szenen: Jede Szene nennt in visible_characters und im Text
-#    explizit <Picture 1> oder <Picture 2>
-# 4. Beachte die kausale Kette: Jede Szene setzt die vorherige Handlung fort
+# Dieses Template demonstriert die 4 essenziellen Grundbausteine eines KI-Films:
+#   1. Solo-Szene für Charakter 1 (<Picture 1> isoliert -> 0% Attention-Bleed)
+#   2. Solo-Szene für Charakter 2 (<Picture 2> isoliert -> 0% Attention-Bleed)
+#   3. Two-Shot / Gruppen-Szene (Beide Charaktere gleichzeitig im Bild)
+#   4. Kausale Aktions-Fortführung (Ursache -> Wirkung ohne Aktions-Schleifen)
+#
+# Jede Szene dauert exakt 5.0 Sekunden (120/121 Frames bei 24 fps).
+# Beliebig viele Szenen können nach diesem Muster angehängt werden.
 # ==============================================================================
 
-character_image: "ComfyUI/input/character1.png"
-character2_image: "ComfyUI/input/character2.png"
+# Pfade zu den Master-Porträts (im ComfyUI/input Ordner)
+character_image: "ComfyUI/input/charakter1.png"
+character2_image: "ComfyUI/input/charakter2.png"
 
 # ==============================================================================
-# 🌟 MASTER-STIL & VISUELLER ANKER (Wird jeder Szene vorangestellt)
+# 🌟 MASTER-STIL & VISUELLER ANKER (Wird automatisch jeder Szene vorangestellt)
 # ==============================================================================
 master_style: >-
   Master Cinematic Look: High-end cinematic aesthetic, shot on 35mm Arri Alexa 65 anamorphic lenses (2.39:1 widescreen frame), shallow depth of field, natural motion blur, authentic 35mm film grain.
-  Atmosphere & Lighting: Atmospheric volumetric lighting, high-contrast chiaroscuro shadows contrasted with vibrant environmental reflections, cinematic color grading.
-  Character Fidelity & Anatomy: Exact photorealistic facial and wardrobe replication from reference images (<Picture 1> [Beschreibung Figur 1], <Picture 2> [Beschreibung Figur 2]).
+  Atmosphere & Lighting: Volumetric atmospheric lighting, high-contrast chiaroscuro shadows contrasted with vibrant environmental reflections, cinematic color grading.
+  Character Fidelity & Anatomy: Exact photorealistic facial and wardrobe replication from reference images (<Picture 1> [Visuelle Merkmale Figur 1], <Picture 2> [Visuelle Merkmale Figur 2]).
   Temporal Progression: Every shot advances forward in time without looping or repeating actions.
 
+# ==============================================================================
+# 🎞️ SZENEN-BAUSTEINE
+# ==============================================================================
 scenes:
-  # --- Szene 1 (0:00 - 0:05): Establishing / Auftakt (Solo Char 1) ---
+  # --- Baustein 1: Solo-Szene Charakter 1 (Auftakt / Fokus auf Figur 1) ---
   - id: 1
     type: "ref2v"
     visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
+      - "Name Figur 1 (<Picture 1>)"
     action: >-
-      Establishing medium shot: <Picture 1> is [Name/Rolle], [visuelle Beschreibung].
-      [Aktion, Bewegung durch den Raum, Scannen der Umgebung].
-    camera: "Smooth dolly-out moving steadily backwards down the corridor as the character advances."
-    audio: "[Foley-Schritte, atmosphärische Umgebungsgeräusche, dezente Musik-Eröffnung]."
+      Medium establishing shot: <Picture 1> is [Name/Rolle Figur 1, z.B. Forscher im Schutzanzug].
+      [Physische Handlung: bewegt sich durch die Szenerie, scannt die Umgebung, Mimik und Haltung].
+    camera: "Smooth slow dolly-out moving steadily backwards as the character advances."
+    audio: "[Foley-Schritte, Raumakustik, spezifische Umgebungsgeräusche, dezenter Musik-Auftakt]."
 
-  # --- Szene 2 (0:05 - 0:10): Weiterführung / Entdeckung (Solo Char 1) ---
+  # --- Baustein 2: Solo-Szene Charakter 2 (Gegenschnitt / Reveal von Figur 2) ---
   - id: 2
     type: "ref2v"
     visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
+      - "Name Figur 2 (<Picture 2>)"
     action: >-
-      <Picture 1> [Aktion setzt Szene 1 fort: nähert sich dem Ziel, entdeckt ein wichtiges Detail oder Hindernis].
-    camera: "Low-angle dynamic tracking push-in following the character's movement."
-    audio: "[Subtile Spannungssteigerung, mechanische Geräusche, Bass-Pulsieren]."
+      Reverse-angle medium shot: <Picture 2> is [Name/Rolle Figur 2, z.B. Pilotin im Hightech-Outfit].
+      [Aktion: interagiert mit einer Requisite, blickt auf und bemerkt die Annäherung, Mimik].
+    camera: "Dynamic rotating arc shot circling smoothly around the character."
+    audio: "[Requisiten-Klang, veränderte Raumakustik, anschwellende Grundstimmung]."
 
-  # --- Szene 3 (0:10 - 0:15): Der Gegenspieler / Reveal (Solo Char 2) ---
+  # --- Baustein 3: Two-Shot (Beide Charaktere gleichzeitig im Bild) ---
   - id: 3
     type: "ref2v"
     visible_characters:
-      - "Hauptfigur 2 (<Picture 2>)"
+      - "Name Figur 1 (<Picture 1>)"
+      - "Name Figur 2 (<Picture 2>)"
     action: >-
-      Medium close-up reveal: <Picture 2> is [Name/Rolle], [visuelle Beschreibung].
-      [Aktion: hält Requisite, bemerkt die Ankunft von Figur 1, lächelt oder reagiert].
-    camera: "Dynamic rotating arc shot circling around the character."
-    audio: "[Crescendo, spezifischer Requisiten-Sound, Raumhall]."
+      Wide cinematic two-shot across [Ort/Raum]:
+      On the left, <Picture 1> [Haltung, Position im Bild].
+      On the right, <Picture 2> [Haltung, Position im Bild].
+      [Spannungsgeladene Interaktion oder Dialog zwischen beiden Figuren].
+    camera: "Wide stationary cinematic master shot with deep anamorphic field and dramatic lighting."
+    audio: "[Dialogzeile oder bedeutungsvolle Stille, atmosphärischer Wind/Hintergrund, Bass-Spannung]."
 
-  # --- Szene 4 (0:15 - 0:20): Die Konfrontation (Two-Shot) ---
+  # --- Baustein 4: Kausale Aktion & Weiterführung (Ursache -> Wirkung) ---
   - id: 4
     type: "ref2v"
     visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
-      - "Hauptfigur 2 (<Picture 2>)"
+      - "Name Figur 1 (<Picture 1>)"
     action: >-
-      Wide cinematic two-shot:
-      On the left, <Picture 1> [Position und Haltung].
-      On the right, <Picture 2> [Position und Haltung].
-      [Spannungsgeladene Pattsituation, Requisite sichtbar im Bild].
-    camera: "Wide stationary cinematic master shot with deep anamorphic field."
-    audio: "[Stille vor dem Sturm, ferne Windböen, knisternde Spannung]."
-
-  # --- Szene 5 (0:20 - 0:25): Nahaufnahme / Forderung (Solo Char 1) ---
-  - id: 5
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
-    action: >-
-      Intense close-up on <Picture 1>: [Mimik, fokussierter Blick].
-      He/She speaks with determination: '[Dialogzeile]'.
-    camera: "Tight 85mm eye-level portrait shot with shallow depth of field."
-    audio: "[Trockene, klare Stimmaufnahme, metallisches Klick-Geräusch, tiefe Drohne]."
-
-  # --- Szene 6 (0:25 - 0:30): Gegenschnitt / Reaktion (Solo Char 2) ---
-  - id: 6
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 2 (<Picture 2>)"
-    action: >-
-      Reverse-angle close-up on <Picture 2>: [Selbstsichere Mimik, feines Lächeln].
-      He/She responds calmly: '[Gegen-Dialogzeile]'.
-    camera: "Slight low-angle close-up emphasizing control and confidence."
-    audio: "[Leises Lachen, Requisiten-SFX, anschwellender Beat]."
-
-  # --- Szene 7 (0:30 - 0:35): Der Aktions-Trigger (Solo Char 2) ---
-  - id: 7
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 2 (<Picture 2>)"
-    action: >-
-      Kinetic explosive action: <Picture 2> abruptly [wirft/schlägt/aktiviert Requisite und sprintet zum Fluchtweg].
-    camera: "Fast low-angle whip tracking shot following the rapid movement."
-    audio: "[Zischen, Wurfgeräusch, schnelle Kampfstiefel-Schritte, Windstoß]."
-
-  # --- Szene 8 (0:35 - 0:40): Die unmittelbare Konsequenz (Solo Char 1) ---
-  - id: 8
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
-    action: >-
-      Immediate consequential reaction: <Picture 1> drops down reflexively to [fangen/ausweichen/blockieren], gaze snapping upward in sudden realization of the diversion.
-    camera: "Snap zoom onto the character's reaction, tilting sharply to the face."
-    audio: "[Harter Aufschlag, kurzes Einatmen, Requisiten-Klang]."
-
-  # --- Szene 9 (0:40 - 0:45): Die Flucht / Eskalation (Solo Char 2) ---
-  - id: 9
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 2 (<Picture 2>)"
-    action: >-
-      Exterior dynamic shot: <Picture 2> vaults up onto [Geländer / Dach / Fahrzeug] overlooking the open scenery, looking back with a mock salute.
-    camera: "Low-angle heroic wide shot framing the character against the sky."
-    audio: "[Tosender Wind, raschelnder Mantel, Ausrüstungs-Klicken]."
-
-  # --- Szene 10 (0:45 - 0:50): Die Verfolgung (Solo Char 1) ---
-  - id: 10
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
-    action: >-
-      Urgent pursuit: <Picture 1> bursts through the doorway into the open elements, sprinting forward toward the ledge with hand outstretched.
-    camera: "Frantic handheld tracking shot charging right behind the character."
-    audio: "[Schwere Schritte, peitschender Wind, Rufe im Sturm]."
-
-  # --- Szene 11 (0:50 - 0:55): Der spektakuläre Stunt (Solo Char 2) ---
-  - id: 11
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 2 (<Picture 2>)"
-    action: >-
-      Breathtaking plunge: <Picture 2> dives backward into the abyss, deploying [Gleiter / Fallschirm / Teleportation] and swooping away through the environment.
-    camera: "Vertigo-inducing high-angle plunge tracking down into the depths."
-    audio: "[Rauschen des freien Falls, Aufschnappen des Gleiters, verhallendes Rauschen]."
-
-  # --- Szene 12 (0:55 - 1:00): Das melancholische Finale (Solo Char 1) ---
-  - id: 12
-    type: "ref2v"
-    visible_characters:
-      - "Hauptfigur 1 (<Picture 1>)"
-    action: >-
-      Final atmospheric master shot: <Picture 1> stands alone looking down into the distance, holding the secured [Requisite], breathing heavily as the environment calms.
-    camera: "Slow cinematic pull-back crane shot ascending high, isolating the lone character."
-    audio: "[Wind legt sich langsam, orchestrales Hauptthema schwillt zum Finale an]."
+      Dynamic reaction shot: <Picture 1> [führt die Handlung aus Szene 3 kausal fort: reagiert auf den Impuls, greift nach einer Requisite oder weicht aus, OHNE die vorige Bewegung zu wiederholen].
+    camera: "Kinetic tracking push-in focusing on the character's immediate reaction."
+    audio: "[Wuchtiger Foley-Einschlag, rasche Bewegung, orchestraler Höhepunkt]."
