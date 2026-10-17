@@ -17,14 +17,14 @@ curl -s -X POST http://127.0.0.1:8188/free \
   -H "Content-Type: application/json" \
   -d '{"unload_models": true, "free_memory": true}' -o /dev/null 2>/dev/null || true
 
-# 2. Falls Ollama Modelle im VRAM hält: Entladen
+# 2. Falls Ollama Modelle im lokalen VRAM hält: Entladen
 if command -v ollama >/dev/null 2>&1; then
-    LOADED_OLLAMA=$(ollama ps 2>/dev/null | awk 'NR>1 {print $1}')
+    LOADED_OLLAMA=$(OLLAMA_HOST="http://127.0.0.1:11434" timeout 2 ollama ps 2>/dev/null | awk 'NR>1 {print $1}')
     if [ -n "$LOADED_OLLAMA" ]; then
-        echo "▶ Entlade aktive Ollama-Modelle:"
+        echo "▶ Entlade aktive lokale Ollama-Modelle aus VRAM:"
         for model in $LOADED_OLLAMA; do
             echo "   - Stoppe $model..."
-            ollama stop "$model" 2>/dev/null || true
+            OLLAMA_HOST="http://127.0.0.1:11434" ollama stop "$model" 2>/dev/null || true
         done
     fi
 fi
