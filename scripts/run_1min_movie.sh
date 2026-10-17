@@ -57,25 +57,27 @@ if [ -t 0 ] && [ "$#" -eq 0 ]; then
     echo "🌀 [1/3] W7800 LÜFTER- & POWER-PROFIL WÄHLEN:"
     echo "   [1] 🌡️ Adaptive Kurve (Empfohlen): Regelt Lüfter live & aggressiv nach Hotspot"
     echo "                              (<50°C: 40% | 50-60°C: 55% | 60-70°C: 70% | 70-80°C: 85% | >=85°C: 100% MAX)"
-    echo "   [2] 🌟 Sweet-Spot (Statisch): 205W, 55% Lüfter (~74°C, leise & kühl)"
-    echo "   [3] 🚀 Performance-Boost:     230W, 65% Lüfter (max. Taktung, thermisch stabil)"
-    echo "   [4] ❄️ Extreme-Cooling:       230W, 85% Lüfter (maximale Kühlung für Dauerlast)"
-    echo "   [5] 🔇 Silent / Desktop:       150W, 40% Lüfter (flüsterleise)"
-    echo "   [6] ⚙️ Standard Automatik:    vBIOS-Automatik (keine manuelle Regelung)"
-    read -p "   Ihre Auswahl [1-6, Standard: 1]: " fan_choice
+    echo "   [2] 🖥️ Smooth Desktop (Anti-Lag): 205W, WINDOW_3D, DPM auto (flüssiger 4K-Desktop bei 60 FPS)"
+    echo "   [3] 🌟 Sweet-Spot (Statisch): 205W, 55% Lüfter (~74°C, leise & kühl)"
+    echo "   [4] 🚀 Performance-Boost:     230W, 65% Lüfter (max. Taktung, thermisch stabil)"
+    echo "   [5] ❄️ Extreme-Cooling:       230W, 85% Lüfter (maximale Kühlung für Dauerlast)"
+    echo "   [6] 🔇 Silent / Desktop:       150W, 40% Lüfter (flüsterleise)"
+    echo "   [7] ⚙️ Standard Automatik:    vBIOS-Automatik (keine manuelle Regelung)"
+    read -p "   Ihre Auswahl [1-7, Standard: 1]: " fan_choice
     case "$fan_choice" in
-        2) FAN_PROFILE="sweet-spot" ;;
-        3) FAN_PROFILE="boost" ;;
-        4) FAN_PROFILE="set-fan 85" ;;
-        5) FAN_PROFILE="set-fan 40" ;;
-        6) FAN_PROFILE="auto" ;;
+        2) FAN_PROFILE="smooth" ;;
+        3) FAN_PROFILE="sweet-spot" ;;
+        4) FAN_PROFILE="boost" ;;
+        5) FAN_PROFILE="set-fan 85" ;;
+        6) FAN_PROFILE="set-fan 40" ;;
+        7) FAN_PROFILE="auto" ;;
         *) FAN_PROFILE="adaptive" ;;
     esac
     echo "   👉 Gewählt: $FAN_PROFILE"
     echo ""
 
-    # --- 2. Auflösung (Megapixel) ---
-    echo "📐 [2/3] NATIVE DIFFUSIONS-AUFLÖSUNG (MEGAPIXEL) WÄHLEN:"
+    # --- 2. Auflösung (Megapixel) & Sampling Steps ---
+    echo "📐 [2/3] NATIVE DIFFUSIONS-AUFLÖSUNG (MEGAPIXEL) & SCHRITTE:"
     echo "   [1] 🌟 0.6 MP (1056x608) — Golden Sweet Spot (+55% mehr native Pixel) [Empfohlen]"
     echo "   [2] ⚡ 0.4 MP (864x480)  — Schneller Baseline-Modus (~80s pro Szene)"
     echo "   [3] 🎬 0.7 MP (1152x640) — Hohe Schärfe (+78% mehr Pixel)"
@@ -87,7 +89,14 @@ if [ -t 0 ] && [ "$#" -eq 0 ]; then
         4) SELECTED_MP="0.98"; SELECTED_STEPS="12" ;;
         *) SELECTED_MP="0.6"; SELECTED_STEPS="10" ;;
     esac
-    echo "   👉 Gewählt: $SELECTED_MP MP ($SELECTED_STEPS Steps)"
+    echo "   👉 Gewählt: $SELECTED_MP MP (Standard: $SELECTED_STEPS Steps)"
+
+    # Optionale Feineinstellung der Sampling Steps
+    read -p "   Sampling Steps anpassen? [Enter für Standard ($SELECTED_STEPS), oder Zahl z.B. 12/14]: " custom_steps
+    if [[ "$custom_steps" =~ ^[0-9]+$ ]] && [ "$custom_steps" -gt 0 ]; then
+        SELECTED_STEPS="$custom_steps"
+        echo "   👉 Sampling Steps angepasst auf: $SELECTED_STEPS Steps"
+    fi
     echo ""
 
     # --- 3. KI-Upscaling ---
@@ -293,8 +302,32 @@ if [ ${#EXTRA_ARGS[@]} -gt 0 ]; then
     CMD_ARGS+=("${EXTRA_ARGS[@]}")
 fi
 
-# Starte Pipeline
-python3 "${CMD_ARGS[@]}"
+# ------------------------------------------------------------------------------
+# 🛡️ Anti-Lag Desktop-Schutz vor Produktionsstart
+# ------------------------------------------------------------------------------
+# 1. Lokale Ollama-Modelle vorübergehend entladen (verhindert VRAM- & GPU-Kollision)
+if command -v ollama >/dev/null 2>&1; then
+    ACTIVE_OLLAMA=$(OLLAMA_HOST="http://127.0.0.1:11434" timeout 2 ollama ps 2>/dev/null | awk 'NR>1 {print $1}')
+    if [ -n "$ACTIVE_OLLAMA" ]; then
+        echo "🛡️ [Anti-Lag] Entlade aktives Ollama-Modell ($ACTIVE_OLLAMA), um 100% GPU-Bandbreite bereitzustellen..."
+        for m in $ACTIVE_OLLAMA; do
+            OLLAMA_HOST="http://127.0.0.1:11434" timeout 5 ollama stop "$m" 2>/dev/null || true
+        done
+    fi
+fi
+
+# 2. Desktop-Compositor (GNOME Mutter) CPU-Priorität erhöhen
+if command -v sudo >/dev/null 2>&1; then
+    GNOME_PID=$(pidof gnome-shell 2>/dev/null || true)
+    if [ -n "$GNOME_PID" ]; then
+        sudo -n renice -n -10 -p $GNOME_PID >/dev/null 2>&1 || true
+    fi
+    # 3. Swap-Thrashing verhindern: Kernel-Swappiness auf 10 setzen
+    sudo -n sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+fi
+
+# Starte Pipeline mit nice -n 5 (Desktop-Eingaben und Fenster-Compositor behalten stets Vorrang)
+nice -n 5 python3 "${CMD_ARGS[@]}"
 
 echo ""
 echo "=================================================================="

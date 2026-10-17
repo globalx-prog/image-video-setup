@@ -266,12 +266,43 @@ set_sweet_spot() {
     show_status
 }
 
+set_smooth_desktop() {
+    echo "🖥️ Aktiviere Desktop-Flüssigkeits-Profil (WINDOW_3D + DPM auto + 205W)..."
+    if [ -f "$HWMON_DIR/power1_cap" ]; then
+        echo 205000000 > "$HWMON_DIR/power1_cap" 2>/dev/null && \
+            echo "  ✅ Power-Limit auf 205W gesetzt."
+    fi
+    if [ -f "$CARD_DIR/pp_power_profile_mode" ]; then
+        if echo 7 > "$CARD_DIR/pp_power_profile_mode" 2>/dev/null; then
+            echo "  ✅ Power-Profil '7 WINDOW_3D' aktiv (bevorzugt Desktop-Compositor, verhindert Ruckeln!)."
+        else
+            echo 0 > "$CARD_DIR/pp_power_profile_mode" 2>/dev/null && \
+                echo "  ✅ Power-Profil '0 BOOTUP_DEFAULT' aktiv."
+        fi
+    fi
+    if [ -f "$CARD_DIR/power_dpm_force_performance_level" ]; then
+        echo auto > "$CARD_DIR/power_dpm_force_performance_level" 2>/dev/null && \
+            echo "  ✅ DPM Level 'auto' aktiv (sofortige Reaktion auf Maus & Fensterbewegung)."
+    fi
+    if [ -f "$HWMON_DIR/pwm1_enable" ]; then
+        echo 1 > "$HWMON_DIR/pwm1_enable" 2>/dev/null
+        sleep 0.2
+        echo 153 > "$HWMON_DIR/pwm1" 2>/dev/null && \
+            echo "  ✅ Blower-Lüfter auf 60% (PWM 153) gesetzt (stabile Kühlung bei flüssigem Desktop)."
+    fi
+    echo ""
+    show_status
+}
+
 case "$1" in
     boost)
         set_boost
         ;;
     sweet-spot|sweet)
         set_sweet_spot
+        ;;
+    smooth|desktop|anti-lag)
+        set_smooth_desktop
         ;;
     power|set-power)
         set_power_limit "$2"
@@ -308,8 +339,10 @@ case "$1" in
         show_status
         ;;
     *)
-        echo "Verwendung: $0 {status|boost|reset|fan-curve|set-fan <%>|silent|balanced|performance|max|auto}"
+        echo "Verwendung: $0 {status|boost|sweet-spot|smooth|reset|fan-curve|set-fan <%>|silent|balanced|performance|max|auto}"
         echo "  status         - Zeigt aktuellen Takt, Temperatur, Power und Lüfter"
+        echo "  smooth         - Anti-Lag Desktop-Modus (WINDOW_3D, 205W, DPM auto, flüssige 60 FPS)"
+        echo "  sweet-spot     - 205W Standard-Power, COMPUTE-Profil, DPM High, 55% Lüfter"
         echo "  boost          - 230W Power Limit, COMPUTE-Profil, DPM High, 65% Lüfter"
         echo "  reset          - Stellt vBIOS-Standardwerte (205W, Auto-Lüfter) wieder her"
         echo "  fan-curve      - Startet dynamische Hitzeschutz-Lüfterkurve im Vordergrund"
