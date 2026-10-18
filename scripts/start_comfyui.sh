@@ -22,5 +22,5 @@ export MALLOC_TRIM_THRESHOLD_=65536
 # --cache-ram 4 16        : Begrenzt Host-RAM-Caching (4 GB aktiv, 16 GB max), verhindert Swap-Thrashing
 # --disable-pinned-memory : Verhindert das Sperren von 43 GB RAM via hipHostRegister (vermeidet Swap-Stau)
 # --disable-async-offload : Nutzt sauberes mmap statt doppelter HostBuffer-Kopien im RAM
-# --fp32-vae              : Zwingt VAE in FP32 (verhindert NaN-Überlauf / komplett schwarze Bilder bei SDXL auf AMD ROCm)
-exec python main.py --reserve-vram 4 --cache-ram 4 16 --disable-pinned-memory --disable-async-offload --fp32-vae --listen 0.0.0.0 --port 8188
+# --enable-compress-response-body : Komprimiert große JSON-Payloads (/object_info, Workflows) für schnellere UI-Ladezeiten
+exec python main.py --reserve-vram 4 --cache-ram 4 16 --disable-pinned-memory --disable-async-offload --fp32-vae --enable-compress-response-body --listen 0.0.0.0 --port 8188
