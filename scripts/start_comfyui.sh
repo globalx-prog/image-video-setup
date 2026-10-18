@@ -14,13 +14,13 @@ cd ComfyUI
 # 1. Verhindert Speicherfragmentierung bei großen Diffusionsmodellen
 export PYTORCH_ALLOC_CONF="garbage_collection_threshold:0.8,max_split_size_mb:512"
 export PYTORCH_CUDA_ALLOC_CONF="garbage_collection_threshold:0.8,max_split_size_mb:512"
-# 2. Vermeidet SDMA-Hardware-Ring Deadlocks bei PCIe Transfers
-export HSA_ENABLE_SDMA=0
+# 3. Zwingt glibc, ungenutzten RAM sofort an den Linux-Kernel zurückzugeben (verhindert Heap-Aufblähung)
+export MALLOC_TRIM_THRESHOLD_=65536
 
 # Startparameter:
-# --reserve-vram 3        : Schützt 3 GB VRAM für den Desktop (GNOME/Wayland)
+# --reserve-vram 4        : Schützt 4 GB VRAM für den 4K-Desktop (GNOME/Wayland bei 60 FPS)
 # --cache-ram 4 16        : Begrenzt Host-RAM-Caching (4 GB aktiv, 16 GB max), verhindert Swap-Thrashing
-# --disable-pinned-memory : Verhindert das Sperren von 43 GB RAM via hipHostRegister (vermeidet 19 GB Swap-Stau bei FLUX.2!)
+# --disable-pinned-memory : Verhindert das Sperren von 43 GB RAM via hipHostRegister (vermeidet Swap-Stau)
 # --disable-async-offload : Nutzt sauberes mmap statt doppelter HostBuffer-Kopien im RAM
 # --fp32-vae              : Zwingt VAE in FP32 (verhindert NaN-Überlauf / komplett schwarze Bilder bei SDXL auf AMD ROCm)
-exec python main.py --reserve-vram 3 --cache-ram 4 16 --disable-pinned-memory --disable-async-offload --fp32-vae --listen 0.0.0.0 --port 8188
+exec python main.py --reserve-vram 4 --cache-ram 4 16 --disable-pinned-memory --disable-async-offload --fp32-vae --listen 0.0.0.0 --port 8188
