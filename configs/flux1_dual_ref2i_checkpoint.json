@@ -1,0 +1,947 @@
+{
+  "id": "eacaecb4-1b27-4932-b6ab-a6182db9b272",
+  "revision": 0,
+  "last_node_id": 20,
+  "last_link_id": 37,
+  "nodes": [
+    {
+      "id": 17,
+      "type": "MarkdownNote",
+      "pos": [
+        100,
+        -220
+      ],
+      "size": [
+        880,
+        280
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "\ud83d\udca1 Anleitung: Flux Dual Reference-to-Image (Ref2I / ReV2I Fusion)",
+      "properties": {},
+      "widgets_values": [
+        "# \ud83c\udfa8 Flux 1 Dev: Dual Reference-to-Image (Ref2I)\n\n### \ud83d\udca1 Optimierungen & Wichtige Hinweise f\u00fcr Flux 1:\n1. **Schrittanzahl (Steps): 20 (OPTIMIERT):**\n   * Zuvor stand der Sampler auf **5 Steps** - dadurch war das Bild extrem unvollst\u00e4ndig, verwaschen und verrauscht.\n   * Mit **20 Steps** und beta-Scheduler wird das Bild gestochen scharf und voll durchgerechnet.\n2. **Text-Prompting bei Flux 1:**\n   * Flux 1 nutzt den T5-XXL Text-Encoder (nicht Mistral 3). Er versteht die Tokens <Picture 1> nicht als Trennung.\n   * Beschreibe daher beide Personen mit r\u00e4umlicher Anordnung im Prompt:\n     * 'On the left: Kira (woman in red top). On the right: Detective Cross (man in suit)...'\n3. **Hardware:**\n   * L\u00e4uft mit flux1-dev-fp8.safetensors \u00fcber CheckpointLoaderSimple in Sekunden an!"
+      ],
+      "widgets_values_named": {
+        "text": "### \ud83c\udfac Flux.2 / Flux.1 Dual-Reference-to-Image (Ref2I)\nDieser Workflow nimmt **zwei Referenzbilder** auf und verschmilzt sie \u00fcber gekettete **ReferenceLatent-Anker** in ein neues Bild.\n\n**So funktioniert die Steuerung im Prompt:**\n- **<Picture 1>**: Bezieht sich auf das obere Bild 1 (z. B. Charakter A, Stil, Outfit).\n- **<Picture 2>**: Bezieht sich auf das untere Bild 2 (z. B. Charakter B, Pose, Umgebung).\n- **Beispiel-Prompt:** \n\n**Turbo LoRA Steuerung (Knoten 2):**\n-  +  -> Blitzschneller Turbo-Modus (~15-20s)\n-  +  -> Reines Flux Dev Qualit\u00e4ts-Sampling (~45s)"
+      },
+      "color": "#2a363b",
+      "bgcolor": "#1f282d"
+    },
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        145.09803323184744,
+        180.78426585477945
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2,
+            31
+          ]
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "flux1-dev-fp8.safetensors"
+      ],
+      "widgets_values_named": {
+        "ckpt_name": "flux1-dev-fp8.safetensors"
+      }
+    },
+    {
+      "id": 2,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        650.1960729915186,
+        468.2352843259107
+      ],
+      "size": [
+        320,
+        130
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "juggernaut_flux_lora.safetensors",
+        0
+      ],
+      "widgets_values_named": {
+        "lora_name": "juggernaut_flux_lora.safetensors",
+        "strength_model": 0
+      }
+    },
+    {
+      "id": 3,
+      "type": "LoadImage",
+      "pos": [
+        134.50977998621343,
+        347.84308938419076
+      ],
+      "size": [
+        340,
+        314.00000000000006
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "title": "\ud83d\uddbc\ufe0f Bild 1: Referenz A (<Picture 1>)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "kira1.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "kira1.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 4,
+      "type": "VAEEncode",
+      "pos": [
+        707.843089384191,
+        264.3137233142546
+      ],
+      "size": [
+        230,
+        96
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            34
+          ]
+        }
+      ],
+      "title": "Encode Latent 1",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "VAEEncode"
+      }
+    },
+    {
+      "id": 5,
+      "type": "LoadImage",
+      "pos": [
+        121.96075439453142,
+        730.7844812729776
+      ],
+      "size": [
+        340,
+        314.0000000000001
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "title": "\ud83d\uddbc\ufe0f Bild 2: Referenz B (<Picture 2>)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "detective_cross.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "detective_cross.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 6,
+      "type": "VAEEncode",
+      "pos": [
+        659.215721089572,
+        851.1765423943012
+      ],
+      "size": [
+        230,
+        96
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 9
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "title": "Encode Latent 2",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "VAEEncode"
+      }
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        1078.1019502527577,
+        180.94902487362134
+      ],
+      "size": [
+        400,
+        260
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            32
+          ]
+        }
+      ],
+      "title": "\ud83d\udcdd Positiver Regie-Prompt (<Picture 1> & <Picture 2>)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "High-end cinematic 35mm photography: Two-shot of two characters standing together in a luxury modern penthouse. On the left is Kira, a young woman with dark hair and green eyes wearing a red top. On the right is Detective Cross, a rugged detective man in a dark suit and coat. Warm volumetric lighting, shallow depth of field, photorealistic skin texture, 8k, sharp focus."
+      ],
+      "widgets_values_named": {
+        "text": "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography:  <Picture 1> woman  and <Picture 2> man standing  in a luxury modern architectural space, warm golden and soft pink volumetric lighting, shallow depth of field, anamorphic lens flares, photorealistic skin texture, 8k resolution"
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 8,
+      "type": "ReferenceLatent",
+      "pos": [
+        1134.1175817805815,
+        712.1569432549297
+      ],
+      "size": [
+        320,
+        100
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 33
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            12
+          ]
+        }
+      ],
+      "title": "\ud83d\udd17 1. Referenz-Latent Anker (<Picture 1>)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "ReferenceLatent"
+      }
+    },
+    {
+      "id": 9,
+      "type": "ReferenceLatent",
+      "pos": [
+        1094.1176340031757,
+        860.784305021725
+      ],
+      "size": [
+        389.67499389648435,
+        100
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 12
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "title": "\ud83d\udd17 2. Referenz-Latent Anker (<Picture 2> - Chained)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "ReferenceLatent"
+      }
+    },
+    {
+      "id": 10,
+      "type": "FluxGuidance",
+      "pos": [
+        1096.470666569185,
+        503.5294835707724
+      ],
+      "size": [
+        320,
+        90
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            33
+          ]
+        }
+      ],
+      "title": "\ud83c\udfaf Flux Guidance (3.5)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        3.5
+      ],
+      "widgets_values_named": {
+        "guidance": 3.5
+      }
+    },
+    {
+      "id": 11,
+      "type": "CLIPTextEncode",
+      "pos": [
+        1133.176582866812,
+        1020.2745407022896
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "title": "Negativer Prompt (Optional)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "ugly, distorted, blurry, low quality, bad anatomy"
+      ],
+      "widgets_values_named": {
+        "text": "ugly, distorted, blurry, low quality, bad anatomy"
+      }
+    },
+    {
+      "id": 12,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        1580,
+        180
+      ],
+      "size": [
+        260,
+        140
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "title": "\ud83d\udcd0 Ziel-Canvas Aufl\u00f6sung",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 13,
+      "type": "KSampler",
+      "pos": [
+        1648.3067381863007,
+        424.8840898765075
+      ],
+      "size": [
+        320,
+        340
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 6
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 37
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 15
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "title": "\ud83d\ude80 Flux Diffusions-Sampler",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        486286022888203,
+        "randomize",
+        20,
+        1,
+        "euler",
+        "beta",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 486286022888203,
+        "control_after_generate": "randomize",
+        "steps": 5,
+        "cfg": 1,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 14,
+      "type": "VAEDecode",
+      "pos": [
+        1654.5098517922795,
+        872.3529411764706
+      ],
+      "size": [
+        230,
+        96
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 17
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "title": "Latent -> Pixel Dekodierung",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 15,
+      "type": "SaveImage",
+      "pos": [
+        2032.5489717371324,
+        340
+      ],
+      "size": [
+        440,
+        400
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "\ud83d\udcbe Bild speichern",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "Flux2_Dual_Ref2I_Output"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "Flux2_Dual_Ref2I_Output"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      1,
+      1,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      1,
+      2,
+      4,
+      1,
+      "VAE"
+    ],
+    [
+      4,
+      1,
+      2,
+      6,
+      1,
+      "VAE"
+    ],
+    [
+      5,
+      1,
+      2,
+      14,
+      1,
+      "VAE"
+    ],
+    [
+      6,
+      2,
+      0,
+      13,
+      0,
+      "MODEL"
+    ],
+    [
+      7,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      9,
+      5,
+      0,
+      6,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      8,
+      0,
+      9,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      11,
+      0,
+      13,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      16,
+      12,
+      0,
+      13,
+      3,
+      "LATENT"
+    ],
+    [
+      17,
+      13,
+      0,
+      14,
+      0,
+      "LATENT"
+    ],
+    [
+      18,
+      14,
+      0,
+      15,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      1,
+      1,
+      11,
+      0,
+      "CLIP"
+    ],
+    [
+      32,
+      7,
+      0,
+      10,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      33,
+      10,
+      0,
+      8,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      4,
+      0,
+      8,
+      1,
+      "LATENT"
+    ],
+    [
+      36,
+      6,
+      0,
+      9,
+      1,
+      "LATENT"
+    ],
+    [
+      37,
+      9,
+      0,
+      13,
+      1,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "\ud83d\udce6 1. Flux Modell-Setup & Turbo-LoRA",
+      "bounding": [
+        100,
+        100,
+        420,
+        850
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "\ud83d\uddbc\ufe0f 2. Dual Referenz-Bilder (<Picture 1> & <Picture 2>)",
+      "bounding": [
+        550,
+        100,
+        460,
+        950
+      ],
+      "color": "#2a5b84",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "\u270d\ufe0f 3. Regie-Prompt & Dual Ref2I-Chaining",
+      "bounding": [
+        1040,
+        100,
+        480,
+        950
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "\ud83d\ude80 4. Sampling & Canvas-Aufl\u00f6sung",
+      "bounding": [
+        1540,
+        100,
+        440,
+        950
+      ],
+      "color": "#2a5b84",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "\ud83d\udcbe 5. Bildausgabe & Vorschau",
+      "bounding": [
+        2000,
+        100,
+        480,
+        950
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0285000000000015,
+      "offset": [
+        -107.28533970904834,
+        89.43740125071028
+      ]
+    },
+    "frontendVersion": "1.53.10",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

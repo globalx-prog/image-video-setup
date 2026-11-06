@@ -8,8 +8,8 @@
       "id": 21,
       "type": "MarkdownNote",
       "pos": [
-        100,
-        -220
+        -390.30483335571296,
+        -518.8893912765504
       ],
       "size": [
         900,
@@ -20,12 +20,13 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "💡 Anleitung: Flux 2 Dual Reference-to-Image (Ref2I / ReV2I Fusion)",
+      "title": "\ud83d\udca1 Anleitung: Flux 2 Dual Reference-to-Image (Ref2I / ReV2I Fusion)",
+      "properties": {},
       "widgets_values": [
-        "### 🎬 Flux 2 Dual-Reference-to-Image (Ref2I / ReV2I)\nDieser Workflow nimmt **zwei Referenzbilder** auf und verschmilzt sie über gekettete **ReferenceLatent-Anker** in ein neues Gesamtbild.\n\n**So steuerst du Charaktere, Stil & Posen im Regie-Prompt:**\n- **<Picture 1>**: Bezieht sich auf Bild 1 (z. B. Detektiv Cross / Kleidung / Gesicht).\n- **<Picture 2>**: Bezieht sich auf Bild 2 (z. B. Elena Vance / Haltung / Umgebung).\n\n**Beispiel-Prompt (Node 9):**\n`High-end cinematic 35mm Arri Alexa 65: <Picture 1> detective in dark trench coat and <Picture 2> woman standing together in a luxury modern pent house, warm golden volumetric lighting, shallow depth of field, photorealistic skin texture, 8k resolution`\n\n**Geschwindigkeits- & Qualitäts-Modi (Node 2 & 14):**\n- **Turbo-Modus (Aktiviert):** Turbo-LoRA (Stärke 1.0) + Flux2Scheduler Steps **8** (~15-20 Sek.)\n- **Dev-Modus (Reines Modell):** Turbo-LoRA bypassen / Stärke 0.0 + Flux2Scheduler Steps **20** (~45-60 Sek.)"
+        "# \ud83d\ude80 Flux 2 Dev: Dual Reference-to-Image (Ref2I) Fusion\n\n### \ud83d\udca1 Wichtige Performance- & Stabilit\u00e4tsregeln:\n1. **Natives FP8 ohne LoRA (Empfohlen):**\n   * Das Diffusionsmodell flux2_dev_fp8mixed.safetensors (35,4 GB) wird direkt in den 48 GB VRAM der Radeon PRO W7800 geladen.\n   * **WICHTIG:** Keine LoRA auf das 35 GB FP8-Modell schalten! Das Patchen von LoRAs zwingt PyTorch zu FP32-Deltas im RAM (\u00fcber 70 GB), was massives 20 GB Swap-Thrashing ausl\u00f6st und ComfyUI scheinbar einfrieren l\u00e4sst.\n   * Schritte: 20 Steps (im Flux 2 Scheduler), Euler Sampler.\n2. **Signal-Kette der Referenz-Bilder:**\n   * Bild 1 (z. B. Kira) -> VAEEncode -> 1. Referenz-Latent Anker.\n   * Bild 2 (z. B. Detective Cross) -> VAEEncode -> 2. Referenz-Latent Anker (kaskadiert hinter Anker 1).\n   * Prompt: Beschreibe beide Charaktere und deren Interaktion (z. B. Two characters in a scene: Kira and Detective Cross talking...).\n   * Flux Guidance: 3.5 (f\u00fcr lebendige Farben und tiefen Kontrast)."
       ],
       "widgets_values_named": {
-        "text": ""
+        "text": "### \ud83c\udfac Flux 2 Dual-Reference-to-Image (Ref2I / ReV2I)\nDieser Workflow nimmt **zwei Referenzbilder** auf und verschmilzt sie \u00fcber gekettete **ReferenceLatent-Anker** in ein neues Gesamtbild.\n\n**So steuerst du Charaktere, Stil & Posen im Regie-Prompt:**\n- **<Picture 1>**: Bezieht sich auf Bild 1 (z. B. Detektiv Cross / Kleidung / Gesicht).\n- **<Picture 2>**: Bezieht sich auf Bild 2 (z. B. Elena Vance / Haltung / Umgebung).\n\n**Beispiel-Prompt (Node 9):**\n`High-end cinematic 35mm Arri Alexa 65: <Picture 1> detective in dark trench coat and <Picture 2> woman standing together in a luxury modern pent house, warm golden volumetric lighting, shallow depth of field, photorealistic skin texture, 8k resolution`\n\n**Geschwindigkeits- & Qualit\u00e4ts-Modi (Node 2 & 14):**\n- **Turbo-Modus (Aktiviert):** Turbo-LoRA (St\u00e4rke 1.0) + Flux2Scheduler Steps **8** (~15-20 Sek.)\n- **Dev-Modus (Reines Modell):** Turbo-LoRA bypassen / St\u00e4rke 0.0 + Flux2Scheduler Steps **20** (~45-60 Sek.)"
       },
       "color": "#2a363b",
       "bgcolor": "#1f282d"
@@ -34,8 +35,8 @@
       "id": 1,
       "type": "UNETLoader",
       "pos": [
-        120,
-        140
+        276.9447154548263,
+        950.6256552331544
       ],
       "size": [
         320,
@@ -44,17 +45,39 @@
       "flags": {},
       "order": 1,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "unet_name",
+          "name": "unet_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "weight_dtype",
+          "name": "weight_dtype",
+          "type": "COMBO",
+          "widget": {
+            "name": "weight_dtype"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            1
+            22
           ]
         }
       ],
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "UNETLoader"
       },
       "widgets_values": [
@@ -70,61 +93,111 @@
       "id": 2,
       "type": "LoraLoaderModelOnly",
       "pos": [
-        120,
-        310
+        280,
+        1100
       ],
       "size": [
         320,
         130
       ],
       "flags": {},
-      "order": 2,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
+          "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": null
+        },
+        {
+          "localized_name": "lora_name",
+          "name": "lora_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "lora_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "strength_model",
+          "name": "strength_model",
+          "type": "FLOAT",
+          "widget": {
+            "name": "strength_model"
+          },
+          "link": null
         }
       ],
       "outputs": [
         {
+          "localized_name": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
-          "links": [
-            2
-          ]
+          "links": []
         }
       ],
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "LoraLoaderModelOnly"
       },
       "widgets_values": [
         "Flux_2-Turbo-LoRA_comfyui.safetensors",
-        1.0
+        0.0
       ],
       "widgets_values_named": {
         "lora_name": "Flux_2-Turbo-LoRA_comfyui.safetensors",
-        "strength_model": 1.0
+        "strength_model": 1
       }
     },
     {
       "id": 3,
       "type": "CLIPLoader",
       "pos": [
-        120,
-        500
+        580.2701764190676,
+        -282.82402375488283
       ],
       "size": [
         320,
         150
       ],
       "flags": {},
-      "order": 3,
+      "order": 2,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "clip_name",
+          "name": "clip_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "clip_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "type",
+          "name": "type",
+          "type": "COMBO",
+          "widget": {
+            "name": "type"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "device",
+          "name": "device",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": {
+            "name": "device"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "CLIP",
           "name": "CLIP",
           "type": "CLIP",
           "links": [
@@ -133,6 +206,8 @@
         }
       ],
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "CLIPLoader"
       },
       "widgets_values": [
@@ -150,19 +225,30 @@
       "id": 4,
       "type": "VAELoader",
       "pos": [
-        120,
-        710
+        -150.9261782931519,
+        370.2241262042237
       ],
       "size": [
         320,
         110
       ],
       "flags": {},
-      "order": 4,
+      "order": 3,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "vae_name",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "VAE",
           "name": "VAE",
           "type": "VAE",
           "links": [
@@ -173,6 +259,8 @@
         }
       ],
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "VAELoader"
       },
       "widgets_values": [
@@ -186,20 +274,39 @@
       "id": 5,
       "type": "LoadImage",
       "pos": [
-        560,
-        140
+        371.06587847290064,
+        49.12010996704095
       ],
       "size": [
         340,
-        260
+        314
       ],
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
-      "title": "🖼️ Bild 1: Referenz A (<Picture 1>)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "choose file to upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
@@ -207,44 +314,50 @@
           ]
         },
         {
+          "localized_name": "MASK",
           "name": "MASK",
           "type": "MASK",
           "links": null
         }
       ],
+      "title": "\ud83d\uddbc\ufe0f Bild 1: Referenz A (<Picture 1>)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "detective_cross.png",
+        "craiyon_222646_a_superhero_with_a_suit_inspired_by_and_based_off_superboy_s_white_solar_suit_in_the_show__young_jus.png",
         "image"
       ],
       "widgets_values_named": {
-        "image": "detective_cross.png"
+        "image": "craiyon_222646_a_superhero_with_a_suit_inspired_by_and_based_off_superboy_s_white_solar_suit_in_the_show__young_jus.png",
+        "upload": "image"
       }
     },
     {
       "id": 6,
       "type": "VAEEncode",
       "pos": [
-        560,
-        440
+        773.1308618103029,
+        137.88398096923808
       ],
       "size": [
         240,
         100
       ],
       "flags": {},
-      "order": 6,
+      "order": 12,
       "mode": 0,
-      "title": "Encode Latent 1",
       "inputs": [
         {
+          "localized_name": "pixels",
           "name": "pixels",
           "type": "IMAGE",
           "link": 7
         },
         {
+          "localized_name": "vae",
           "name": "vae",
           "type": "VAE",
           "link": 4
@@ -252,6 +365,7 @@
       ],
       "outputs": [
         {
+          "localized_name": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
@@ -259,7 +373,10 @@
           ]
         }
       ],
+      "title": "Encode Latent 1",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "VAEEncode"
       }
     },
@@ -267,20 +384,39 @@
       "id": 7,
       "type": "LoadImage",
       "pos": [
-        560,
-        590
+        145.55648450134262,
+        554.1763613214112
       ],
       "size": [
         340,
-        260
+        314
       ],
       "flags": {},
-      "order": 7,
+      "order": 5,
       "mode": 0,
-      "title": "🖼️ Bild 2: Referenz B (<Picture 2>)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": {
+            "name": "image"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "choose file to upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
@@ -288,44 +424,50 @@
           ]
         },
         {
+          "localized_name": "MASK",
           "name": "MASK",
           "type": "MASK",
           "links": null
         }
       ],
+      "title": "\ud83d\uddbc\ufe0f Bild 2: Referenz B (<Picture 2>)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "elena_vance.png",
+        "detective_cross.png",
         "image"
       ],
       "widgets_values_named": {
-        "image": "elena_vance.png"
+        "image": "detective_cross.png",
+        "upload": "image"
       }
     },
     {
       "id": 8,
       "type": "VAEEncode",
       "pos": [
-        560,
-        890
+        718.1358553497313,
+        544.0958937200927
       ],
       "size": [
         240,
         100
       ],
       "flags": {},
-      "order": 8,
+      "order": 13,
       "mode": 0,
-      "title": "Encode Latent 2",
       "inputs": [
         {
+          "localized_name": "pixels",
           "name": "pixels",
           "type": "IMAGE",
           "link": 9
         },
         {
+          "localized_name": "vae",
           "name": "vae",
           "type": "VAE",
           "link": 5
@@ -333,6 +475,7 @@
       ],
       "outputs": [
         {
+          "localized_name": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
@@ -340,7 +483,10 @@
           ]
         }
       ],
+      "title": "Encode Latent 2",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "VAEEncode"
       }
     },
@@ -348,26 +494,36 @@
       "id": 9,
       "type": "CLIPTextEncode",
       "pos": [
-        1020,
-        140
+        968.5524350952152,
+        -223.5316283332825
       ],
       "size": [
         420,
         260
       ],
       "flags": {},
-      "order": 9,
+      "order": 11,
       "mode": 0,
-      "title": "📝 Positiver Regie-Prompt (<Picture 1> & <Picture 2>)",
       "inputs": [
         {
+          "localized_name": "clip",
           "name": "clip",
           "type": "CLIP",
           "link": 3
+        },
+        {
+          "localized_name": "text",
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": null
         }
       ],
       "outputs": [
         {
+          "localized_name": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
@@ -375,14 +531,17 @@
           ]
         }
       ],
+      "title": "\ud83d\udcdd Positiver Regie-Prompt (<Picture 1> & <Picture 2>)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: <Picture 1> detective and <Picture 2> athletic woman standing together in a luxury modern penthouse, warm golden and soft pink volumetric lighting, shallow depth of field, anamorphic lens flares, photorealistic skin texture, 8k resolution"
+        "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: create a fighting picture between two men"
       ],
       "widgets_values_named": {
-        "text": "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: <Picture 1> detective and <Picture 2> athletic woman standing together in a luxury modern penthouse, warm golden and soft pink volumetric lighting, shallow depth of field, anamorphic lens flares, photorealistic skin texture, 8k resolution"
+        "text": "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: create a fighting picture between two men"
       },
       "color": "#232",
       "bgcolor": "#353"
@@ -391,26 +550,36 @@
       "id": 10,
       "type": "FluxGuidance",
       "pos": [
-        1020,
-        440
+        1087.8491775317384,
+        196.85027356811534
       ],
       "size": [
         320,
         90
       ],
       "flags": {},
-      "order": 10,
+      "order": 14,
       "mode": 0,
-      "title": "🎯 Flux Guidance (3.5)",
       "inputs": [
         {
+          "localized_name": "conditioning",
           "name": "conditioning",
           "type": "CONDITIONING",
           "link": 11
+        },
+        {
+          "localized_name": "guidance",
+          "name": "guidance",
+          "type": "FLOAT",
+          "widget": {
+            "name": "guidance"
+          },
+          "link": null
         }
       ],
       "outputs": [
         {
+          "localized_name": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
@@ -418,7 +587,10 @@
           ]
         }
       ],
+      "title": "\ud83c\udfaf Flux Guidance (3.5)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "FluxGuidance"
       },
       "widgets_values": [
@@ -432,31 +604,34 @@
       "id": 11,
       "type": "ReferenceLatent",
       "pos": [
-        1020,
-        580
+        1073.2912763928225,
+        533.1560446856688
       ],
       "size": [
         320,
         100
       ],
       "flags": {},
-      "order": 11,
+      "order": 15,
       "mode": 0,
-      "title": "🔗 1. Referenz-Latent Anker (<Picture 1>)",
       "inputs": [
         {
+          "localized_name": "conditioning",
           "name": "conditioning",
           "type": "CONDITIONING",
           "link": 12
         },
         {
+          "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 8
         }
       ],
       "outputs": [
         {
+          "localized_name": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
@@ -464,7 +639,10 @@
           ]
         }
       ],
+      "title": "\ud83d\udd17 1. Referenz-Latent Anker (<Picture 1>)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "ReferenceLatent"
       }
     },
@@ -472,31 +650,34 @@
       "id": 12,
       "type": "ReferenceLatent",
       "pos": [
-        1020,
-        720
+        1021.8071670898438,
+        813.13330078125
       ],
       "size": [
-        320,
+        387.5363525390625,
         100
       ],
       "flags": {},
-      "order": 12,
+      "order": 16,
       "mode": 0,
-      "title": "🔗 2. Referenz-Latent Anker (<Picture 2> - Chained)",
       "inputs": [
         {
+          "localized_name": "conditioning",
           "name": "conditioning",
           "type": "CONDITIONING",
           "link": 13
         },
         {
+          "localized_name": "latent",
           "name": "latent",
+          "shape": 7,
           "type": "LATENT",
           "link": 10
         }
       ],
       "outputs": [
         {
+          "localized_name": "CONDITIONING",
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
@@ -504,7 +685,10 @@
           ]
         }
       ],
+      "title": "\ud83d\udd17 2. Referenz-Latent Anker (<Picture 2> - Chained)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "ReferenceLatent"
       }
     },
@@ -513,19 +697,47 @@
       "type": "EmptyFlux2LatentImage",
       "pos": [
         1460,
-        140
+        80
       ],
       "size": [
         280,
         150
       ],
       "flags": {},
-      "order": 13,
+      "order": 6,
       "mode": 0,
-      "title": "📐 Ziel-Canvas Auflösung (Flux 2)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "width",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "height",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "batch_size",
+          "name": "batch_size",
+          "type": "INT",
+          "widget": {
+            "name": "batch_size"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "LATENT",
           "name": "LATENT",
           "type": "LATENT",
           "links": [
@@ -533,7 +745,10 @@
           ]
         }
       ],
+      "title": "\ud83d\udcd0 Ziel-Canvas Aufl\u00f6sung (Flux 2)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "EmptyFlux2LatentImage"
       },
       "widgets_values": [
@@ -552,19 +767,47 @@
       "type": "Flux2Scheduler",
       "pos": [
         1460,
-        330
+        260
       ],
       "size": [
         280,
         150
       ],
       "flags": {},
-      "order": 14,
+      "order": 7,
       "mode": 0,
-      "title": "⏱️ Flux 2 Scheduler (Sigmas)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "steps",
+          "name": "steps",
+          "type": "INT",
+          "widget": {
+            "name": "steps"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "width",
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "height",
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "SIGMAS",
           "name": "SIGMAS",
           "type": "SIGMAS",
           "links": [
@@ -572,11 +815,14 @@
           ]
         }
       ],
+      "title": "\u23f1\ufe0f Flux 2 Scheduler (Sigmas)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "Flux2Scheduler"
       },
       "widgets_values": [
-        8,
+        20,
         1024,
         1024
       ],
@@ -591,23 +837,24 @@
       "type": "BasicGuider",
       "pos": [
         1460,
-        520
+        440
       ],
       "size": [
         280,
-        110
+        150
       ],
       "flags": {},
-      "order": 15,
+      "order": 17,
       "mode": 0,
-      "title": "🧭 Basic Guider",
       "inputs": [
         {
+          "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 2
+          "link": 22
         },
         {
+          "localized_name": "conditioning",
           "name": "conditioning",
           "type": "CONDITIONING",
           "link": 14
@@ -615,6 +862,7 @@
       ],
       "outputs": [
         {
+          "localized_name": "GUIDER",
           "name": "GUIDER",
           "type": "GUIDER",
           "links": [
@@ -622,7 +870,10 @@
           ]
         }
       ],
+      "title": "\ud83e\udded Basic Guider",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "BasicGuider"
       }
     },
@@ -631,19 +882,29 @@
       "type": "KSamplerSelect",
       "pos": [
         1460,
-        670
+        620
       ],
       "size": [
         280,
-        100
+        90
       ],
       "flags": {},
-      "order": 16,
+      "order": 8,
       "mode": 0,
-      "title": "🎛️ Sampler Select (Euler)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "sampler_name",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "SAMPLER",
           "name": "SAMPLER",
           "type": "SAMPLER",
           "links": [
@@ -651,7 +912,10 @@
           ]
         }
       ],
+      "title": "\ud83c\udf9b\ufe0f Sampler Select (Euler)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "KSamplerSelect"
       },
       "widgets_values": [
@@ -666,19 +930,29 @@
       "type": "RandomNoise",
       "pos": [
         1460,
-        810
+        740
       ],
       "size": [
         280,
         110
       ],
       "flags": {},
-      "order": 17,
+      "order": 9,
       "mode": 0,
-      "title": "🎲 Random Noise (Seed)",
-      "inputs": [],
+      "inputs": [
+        {
+          "localized_name": "noise_seed",
+          "name": "noise_seed",
+          "type": "INT",
+          "widget": {
+            "name": "noise_seed"
+          },
+          "link": null
+        }
+      ],
       "outputs": [
         {
+          "localized_name": "NOISE",
           "name": "NOISE",
           "type": "NOISE",
           "links": [
@@ -686,15 +960,18 @@
           ]
         }
       ],
+      "title": "\ud83c\udfb2 Random Noise (Seed)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "RandomNoise"
       },
       "widgets_values": [
-        123456789,
+        720742567016386,
         "randomize"
       ],
       "widgets_values_named": {
-        "noise_seed": 123456789,
+        "noise_seed": 720742567016386,
         "control_after_generate": "randomize"
       }
     },
@@ -702,8 +979,8 @@
       "id": 18,
       "type": "SamplerCustomAdvanced",
       "pos": [
-        1860,
-        140
+        1901.9466308593746,
+        187.59332885742185
       ],
       "size": [
         300,
@@ -712,29 +989,33 @@
       "flags": {},
       "order": 18,
       "mode": 0,
-      "title": "🚀 Sampler Custom Advanced",
       "inputs": [
         {
+          "localized_name": "noise",
           "name": "noise",
           "type": "NOISE",
           "link": 19
         },
         {
+          "localized_name": "guider",
           "name": "guider",
           "type": "GUIDER",
           "link": 17
         },
         {
+          "localized_name": "sampler",
           "name": "sampler",
           "type": "SAMPLER",
           "link": 18
         },
         {
+          "localized_name": "sigmas",
           "name": "sigmas",
           "type": "SIGMAS",
           "link": 16
         },
         {
+          "localized_name": "latent_image",
           "name": "latent_image",
           "type": "LATENT",
           "link": 15
@@ -742,14 +1023,24 @@
       ],
       "outputs": [
         {
+          "localized_name": "output",
           "name": "output",
           "type": "LATENT",
           "links": [
             20
           ]
+        },
+        {
+          "localized_name": "denoised_output",
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": null
         }
       ],
+      "title": "\ud83d\ude80 Sampler Custom Advanced",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "SamplerCustomAdvanced"
       }
     },
@@ -757,24 +1048,25 @@
       "id": 19,
       "type": "VAEDecode",
       "pos": [
-        1860,
-        460
+        1898.7199462890624,
+        572.9332885742186
       ],
       "size": [
-        240,
+        251.01363220214844,
         100
       ],
       "flags": {},
       "order": 19,
       "mode": 0,
-      "title": "🎨 VAE Decode (Latent -> Pixel)",
       "inputs": [
         {
+          "localized_name": "samples",
           "name": "samples",
           "type": "LATENT",
           "link": 20
         },
         {
+          "localized_name": "vae",
           "name": "vae",
           "type": "VAE",
           "link": 6
@@ -782,6 +1074,7 @@
       ],
       "outputs": [
         {
+          "localized_name": "IMAGE",
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
@@ -789,7 +1082,10 @@
           ]
         }
       ],
+      "title": "\ud83c\udfa8 VAE Decode (Latent -> Pixel)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "VAEDecode"
       }
     },
@@ -797,8 +1093,8 @@
       "id": 20,
       "type": "SaveImage",
       "pos": [
-        1860,
-        600
+        2177.533447265625,
+        592.6666870117188
       ],
       "size": [
         360,
@@ -807,16 +1103,35 @@
       "flags": {},
       "order": 20,
       "mode": 0,
-      "title": "💾 Bild Speichern (Output)",
       "inputs": [
         {
+          "localized_name": "images",
           "name": "images",
           "type": "IMAGE",
           "link": 21
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": {
+            "name": "filename_prefix"
+          },
+          "link": null
         }
       ],
-      "outputs": [],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "\ud83d\udcbe Bild Speichern (Output)",
       "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
         "Node name for S&R": "SaveImage"
       },
       "widgets_values": [
@@ -828,22 +1143,6 @@
     }
   ],
   "links": [
-    [
-      1,
-      1,
-      0,
-      2,
-      0,
-      "MODEL"
-    ],
-    [
-      2,
-      2,
-      0,
-      15,
-      0,
-      "MODEL"
-    ],
     [
       3,
       3,
@@ -995,42 +1294,17 @@
       20,
       0,
       "IMAGE"
+    ],
+    [
+      22,
+      1,
+      0,
+      15,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [
-    {
-      "id": 1,
-      "title": "1. Flux 2 Modelle & LoRA",
-      "bounding": [
-        100,
-        70,
-        360,
-        790
-      ],
-      "color": "#3f789e"
-    },
-    {
-      "id": 2,
-      "title": "2. Referenzbilder (Dual Input)",
-      "bounding": [
-        540,
-        70,
-        380,
-        950
-      ],
-      "color": "#3f789e"
-    },
-    {
-      "id": 3,
-      "title": "3. Prompt & Chained Reference Anchors",
-      "bounding": [
-        1000,
-        70,
-        430,
-        780
-      ],
-      "color": "#3f789e"
-    },
     {
       "id": 4,
       "title": "4. Flux 2 Custom Sampler Setup",
@@ -1040,7 +1314,8 @@
         340,
         880
       ],
-      "color": "#3f789e"
+      "color": "#3f789e",
+      "flags": {}
     },
     {
       "id": 5,
@@ -1051,16 +1326,17 @@
         400,
         950
       ],
-      "color": "#3f789e"
+      "color": "#3f789e",
+      "flags": {}
     }
   ],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.75,
+      "scale": 0.9090909090909095,
       "offset": [
-        50,
-        250
+        -682.034316764313,
+        249.49204392569553
       ]
     }
   },

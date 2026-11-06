@@ -78,7 +78,7 @@ def build_ref2i_prompt(
     prompt_text,
     width=1024,
     height=1024,
-    turbo=True,
+    turbo=False,
     steps=None,
     guidance=3.5,
     seed=None,
@@ -97,14 +97,6 @@ def build_ref2i_prompt(
                 "weight_dtype": "default"
             },
             "class_type": "UNETLoader"
-        },
-        "2": {
-            "inputs": {
-                "model": ["1", 0],
-                "lora_name": "Flux_2-Turbo-LoRA_comfyui.safetensors",
-                "strength_model": 1.0 if turbo else 0.0
-            },
-            "class_type": "LoraLoaderModelOnly"
         },
         "3": {
             "inputs": {
@@ -192,7 +184,7 @@ def build_ref2i_prompt(
         },
         "15": {
             "inputs": {
-                "model": ["2" if turbo else "1", 0],
+                "model": ["2", 0] if turbo else ["1", 0],
                 "conditioning": ["12", 0]
             },
             "class_type": "BasicGuider"
@@ -234,6 +226,15 @@ def build_ref2i_prompt(
             "class_type": "SaveImage"
         }
     }
+    if turbo:
+        api_dict["2"] = {
+            "inputs": {
+                "model": ["1", 0],
+                "lora_name": "Flux_2-Turbo-LoRA_comfyui.safetensors",
+                "strength_model": 1.0
+            },
+            "class_type": "LoraLoaderModelOnly"
+        }
     return api_dict, seed
 
 
@@ -362,3 +363,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

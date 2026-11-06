@@ -12,6 +12,10 @@
 
 character_image: "ComfyUI/input/kira.png"
 character2_image: "ComfyUI/input/lena.png"
+
+char3_kira: "ComfyUI/input/last_frame_sc19.png"
+char4_lena: "ComfyUI/input/last_frame_sc21.png"
+
 master_style: "High-end cinematic aesthetic, 35mm Arri Alexa 65 cinematography: warm golden and soft pink volumetric lighting, shallow depth of field, anamorphic lens flares, photorealistic skin texture, 8k."
 scenes:
 
@@ -113,96 +117,296 @@ scenes:
 
 # --- Szene 13 (0:00 - 0:05): Der Kuss vertieft sich (Ref2V) ---
 - id: 13
-type: "ref2v"
-action: >
-<Picture 1> Kira and <Picture 2> Lena's lips are locked in a deep, passionate kiss. Both close their eyes. The touch is intense, breathing flat and fast. Time seems to stand still.
-camera: "Close-up of the faces and touching lips, shallow depth of field."
-audio: "Silence, only fast flat breathing, deep warmth."
+  type: "ref2v"
+  action: >
+    <Picture 1> Kira and <Picture 2> Lena's lips are locked in a deep, passionate kiss. Both close their eyes. The touch is intense, breathing flat and fast. Time seems to stand still.
+    camera: "Close-up of the faces and touching lips, shallow depth of field."
+    audio: "Silence, only fast flat breathing, deep warmth."
 
 # --- Szene 14 (0:05 - 0:10): Kira zieht Lena fester an sich (I2V) ---
 - id: 14
-type: "i2v"
-action: >
-<Picture 1> Kira pulls <Picture 2> Lena tighter to herself. Her arms wrap around <Picture 2> Lena's back, her hands massage <Picture 2> Lena's breasts. <Picture 2> Lena grips <Picture 1> Kira's shoulders, her fingers dig into the muscular tissue. Both tremble faintly.
-camera: "Close-up of the interlocking arms and hands, shallow depth of field."
-audio: "Shallow, trembling breathing, passionate warmth, faint trembling."
+  type: "i2v"
+  action: >
+    <Picture 1> Kira pulls <Picture 2> Lena tighter to herself. Her arms wrap around <Picture 2> Lena's back, her hands massage <Picture 2> Lena's breasts. <Picture 2> Lena grips <Picture 1> Kira's shoulders, her fingers dig into the muscular tissue. Both tremble faintly.
+    camera: "Close-up of the interlocking arms and hands, shallow depth of field."
+    audio: "Shallow, trembling breathing, passionate warmth, faint trembling."
 
 # --- Szene 15 (0:10 - 0:15): Die Arme schlingen sich um einander (I2V) ---
 - id: 15
-type: "i2v"
-action: >
-The arms wrap around each other. <Picture 1> Kira massages <Picture 2> Lena's breasts tenderly, firmly, with a soft circular motion. <Picture 2> Lena returns: her right hand rests under <Picture 1> Kira's breasts and massages them with the same tenderness, the same firmness. Both breathe shallower, fingers grip tighter.
-camera: "Close-up of the hands under the breasts, shallow depth of field."
-audio: "Shallow, faster breathing, tender warmth, faint sighing."
+  type: "i2v"
+  action: >
+    The arms wrap around each other. <Picture 1> Kira massages <Picture 2> Lena's breasts tenderly, firmly, with a soft circular motion. <Picture 2> Lena returns: her right hand rests under <Picture 1> Kira's breasts and massages them with the same tenderness, the same firmness. Both breathe shallower, fingers grip tighter.
+    camera: "Close-up of the hands under the breasts, shallow depth of field."
+    audio: "Shallow, faster breathing, tender warmth, faint sighing."
 
 # --- Szene 16 (0:15 - 0:20): Beide beben leise (I2V) ---
 - id: 16
-type: "i2v"
-action: >
-Both tremble faintly. The fingers grip tighter still. Breathing becomes flatter, faster. A sighing, soft sound escapes both.
-camera: "Close-up, shallow depth of field."
-audio: "Faint trembling, sighing breath, deep warmth."
+  type: "i2v"
+  action: >
+    Both tremble faintly. The fingers grip tighter still. Breathing becomes flatter, faster. A sighing, soft sound escapes both.
+    camera: "Close-up, shallow depth of field."
+    audio: "Faint trembling, sighing breath, deep warmth."
 
 # --- Szene 17 (0:20 - 0:25): Kira massiert Lenas Brüste zärtlich (Ref2V) ---
 - id: 17
-type: "ref2v"
-action: >
-<Picture 1> Kira massages <Picture 2> Lena's breasts tenderly, firmly, with a soft circular motion. Her hands rest under <Picture 2> Lena's large breasts. <Picture 2> Lena sighs softly, eyes closed.
-camera: "Close-up of the hands under the breasts, shallow depth of field."
-audio: "Soft sighing, tender warmth, quiet music."
+  type: "ref2v"
+  action: >
+    <Picture 1> Kira massages <Picture 2> Lena's breasts tenderly, firmly, with a soft circular motion. Her hands rest under <Picture 2> Lena's large breasts. <Picture 2> Lena sighs softly, eyes closed.
+    camera: "Close-up of the hands under the breasts, shallow depth of field."
+    audio: "Soft sighing, tender warmth, quiet music."
 
 # --- Szene 18 (0:25 - 0:30): Lena erwidert, massiert Kiras Brüste (I2V) ---
 - id: 18
-type: "i2v"
-action: >
-<Picture 2> Lena returns: her right hand rests under <Picture 1> Kira's breasts and massages them with the same tenderness, the same firmness. <Picture 1> Kira breathes shallower, eyes closed, a sighing, soft sound.
-camera: "Close-up of the hands under the breasts, shallow depth of field."
-audio: "Shallow, faster breathing, tender warmth, faint sighing."
+  type: "i2v"
+  action: >
+    <Picture 2> Lena returns: her right hand rests under <Picture 1> Kira's breasts and massages them with the same tenderness, the same firmness. <Picture 1> Kira breathes shallower, eyes closed, a sighing, soft sound.
+    camera: "Close-up of the hands under the breasts, shallow depth of field."
+    audio: "Shallow, faster breathing, tender warmth, faint sighing."
 
 # --- Szene 19 (0:30 - 0:35): Die Finger greifen fester (I2V) ---
 - id: 19
-type: "i2v"
-action: >
-The fingers grip tighter still. Breathing becomes flatter, faster. A sighing, soft sound escapes both.
-camera: "Close-up, shallow depth of field."
-audio: "Faint trembling, sighing breath, deep warmth."
+  type: "i2v"
+  action: >
+    The fingers grip tighter still. Breathing becomes flatter, faster. A sighing, soft sound escapes both.
+    camera: "Close-up, shallow depth of field."
+    audio: "Faint trembling, sighing breath, deep warmth."
 
 # --- Szene 20 (0:35 - 0:40): Beide atmen flacher (I2V) ---
 - id: 20
-type: "i2v"
-action: >
-Both breathe flatter, faster. Breathing becomes even shallower. A sighing, soft sound escapes both.
-camera: "Close-up, shallow depth of field."
-audio: "Shallow, faster breathing, tender warmth."
+  type: "i2v"
+  action: >
+    Both breathe flatter, faster. Breathing becomes even shallower. A sighing, soft sound escapes both.
+    camera: "Close-up, shallow depth of field."
+    audio: "Shallow, faster breathing, tender warmth."
 
 # --- Szene 21 (0:40 - 0:45): Kira zieht den BH aus (Ref2V) ---
 - id: 21
-type: "ref2v"
-action: >
-<Picture 1> Kira pulls off her red sports bra. Her large breasts are now free, the skin smooth and taut. The fingers continue to massage, breathing flat.
-camera: "Close-up of the upper body, shallow depth of field."
-audio: "Faint trembling, sighing breath, deep warmth."
+  type: "ref2v"
+  action: >
+    <Picture 1> Kira pulls off her red sports bra. Her large breasts are now free, the skin smooth and taut. The fingers continue to massage, breathing flat.
+    camera: "Close-up of the upper body, shallow depth of field."
+    audio: "Faint trembling, sighing breath, deep warmth."
 
 # --- Szene 22 (0:45 - 0:50): Lena zieht den BH aus (I2V) ---
 - id: 22
-type: "i2v"
-action: >
-<Picture 2> Lena pulls off her black sports bra. Her large breasts are now free, the skin smooth and taut. The fingers continue to massage, breathing flat.
-camera: "Close-up of the upper body, shallow depth of field."
-audio: "Faint trembling, sighing breath, deep warmth."
+  type: "i2v"
+  action: >
+    <Picture 2> Lena pulls off her black sports bra. Her large breasts are now free, the skin smooth and taut. The fingers continue to massage, breathing flat.
+    camera: "Close-up of the upper body, shallow depth of field."
+    audio: "Faint trembling, sighing breath, deep warmth."
 
 # --- Szene 23 (0:50 - 0:55): Beide stehen nackt (I2V) ---
 - id: 23
-type: "i2v"
-action: >
-Both stand naked. Their large breasts are free, the skin smooth and taut. Their arms wrap around each other, fingers dig into the muscular tissue.
-camera: "Close-up, shallow depth of field."
-audio: "Shallow, faster breathing, tender warmth."
+  type: "i2v"
+  action: >
+    Both stand naked <Picture 3> and <Picture 4>. Their large breasts are free, the skin smooth and taut. Their arms wrap around each other, fingers dig into the muscular tissue.
+    camera: "Close-up, shallow depth of field."
+    audio: "Shallow, faster breathing, tender warmth."
 
 # --- Szene 24 (0:55 - 1:00): Nackte Umarmung, kein Ende (I2V) ---
 - id: 24
-type: "i2v"
-action: >
-Naked embrace, no end. Their arms wrap around each other, fingers dig into the muscular tissue. A sighing, soft sound escapes both.
-camera: "Slow pull-back, the two grow smaller in the frame, warm golden lighting."
-audio: "Quiet, soft music fading slowly, deep peaceful warmth."
+  type: "i2v"
+  action: >
+    <Picture 3> <Picture 4> Naked embrace, no end. Their arms wrap around each other, fingers dig into the muscular tissue. A sighing, soft sound escapes both.
+    camera: "Slow pull-back, the two grow smaller in the frame, warm golden lighting."
+    audio: "Quiet, soft music fading slowly, deep peaceful warmth."
+
+# --- Szene 25 (0:00 - 0:05): Kira umfasst Lenas Brüste (Ref2V) ---
+- id: 25
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira wraps both hands around <Picture 4> Lena's large breasts, holding them firmly. <Picture 4> Lena's eyes are closed, a soft sigh on her lips.
+    camera: "Close-up of the hands on the breasts, shallow depth of field."
+    audio: "Soft sighing, tender warmth."
+
+# --- Szene 26 (0:05 - 0:10): Kira küsst Lenas rechte Brust (Ref2V) ---
+- id: 26
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira presses her lips to <Picture 4> Lena's right breast, kissing it slowly, tenderly. <Picture 4> Lena's body relaxes, a soft moan escapes her.
+    camera: "Close-up, shallow depth of field."
+    audio: "Soft moaning, gentle warmth."
+
+# --- Szene 27 (0:10 - 0:15): Jetzt intensiver (Ref2V) ---
+- id: 27
+  type: "ref2v"
+  action: >
+    The kiss on the breast grows deeper, more intense. <Picture 3> Kira's grip tightens, <Picture 4> Lena's breathing quickens, a shudder runs through her body.
+    camera: "Close-up, shallow depth of field."
+    audio: "Faster breathing, deep warmth."
+
+# --- Szene 28 (0:15 - 0:20): Sie schauen sich in die Augen (Ref2V) ---
+- id: 28
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira and <Picture 4> Lena look into each other's eyes, gazing deeply, steadily. Their faces are close, only inches apart.
+    camera: "Close-up of the two faces, shallow depth of field."
+    audio: "Quiet, steady breathing."
+
+# --- Szene 29 (0:20 - 0:25): Sie küssen sich intensiv, Kira umfasst Lenas Kopf (Ref2V) ---
+- id: 29
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira and <Picture 4> Lena kiss intensely, passionately. <Picture 3> Kira's hand cups <Picture 4> Lena's head, holding it close.
+    camera: "Close-up of the faces and the hand on the head, shallow depth of field."
+    audio: "Fast breathing, deep passion."
+
+# --- Szene 30 (0:25 - 0:30): Weiter küssen, Perspektive aus Distanz (Ref2V) ---
+- id: 30
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira and <Picture 4> Lena continue to kiss. The camera pulls back, revealing their curvy, athletic bodies and wide hips.
+    camera: "Wide shot pulling back, full body visible."
+    audio: "Soft, rhythmic breathing."
+
+# --- Szene 31 (0:30 - 0:35): Lena küsst Kiras Brüste (Ref2V) ---
+- id: 31
+  type: "ref2v"
+  action: >
+    <Picture 4> Lena presses her lips to <Picture 3> Kira's breasts, kissing them slowly, with deep tenderness. <Picture 1> Kira's body tenses, a soft moan.
+    camera: "Close-up, shallow depth of field."
+    audio: "Soft moaning, gentle warmth."
+
+# --- Szene 32 (0:35 - 0:40): Lena küsst Kiras Bauch (Ref2V) ---
+- id: 32
+  type: "ref2v"
+  action: >
+    <Picture 4> Lena moves down, kissing <Picture 3> Kira's stomach, tracing slow, gentle lines with her lips. <Picture 3> Kira's breathing quickens.
+    camera: "Close-up, shallow depth of field."
+    audio: "Faster breathing, soft moaning."
+
+# --- Szene 33 (0:40 - 0:45): Lena küsst Kiras Vulva, streckt Po nach oben (Ref2V) ---
+- id: 33
+  type: "ref2v"
+  action: >
+    <Picture 4> Lena presses her lips to <Picture 3> Kira's vulva, kissing it tenderly. <Picture 4> Lena arches her back, lifting her hips. Both are lying down, the camera shows <Picture 4> Lena from behind.
+    camera: "Close-up from behind, shallow depth of field."
+    audio: "Soft moaning, quickening breath."
+
+# --- Szene 34 (0:45 - 0:50): Weiter so, schräg obere Sicht (Ref2V) ---
+- id: 34
+  type: "ref2v"
+  action: >
+    <Picture 4> Lena continues to kiss <Picture 3> Kira's vulva, her movements steady, unhurried. The camera is positioned diagonally above.
+    camera: "Diagonal high-angle close-up, shallow depth of field."
+    audio: "Soft, rhythmic moaning."
+
+# --- Szene 35 (0:50 - 0:55): Kira stöhnt, Lena leckt mit Zunge (Ref2V) ---
+- id: 35
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira moans, her body arching. <Picture 4> Lena licks her with her tongue, slow, deliberate strokes. The camera is from the side, moving closer.
+    camera: "Side close-up, shallow depth of field."
+    audio: "Loud moaning, fast breathing."
+
+# --- Szene 36 (0:55 - 1:00): Kiras Oberkörper hebt und senkt sich (Ref2V) ---
+- id: 36
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's upper body rises and falls with each breath, her hips lifting slightly. <Picture 4> Lena's hand rests on her lower back, holding her steady.
+    camera: "Close-up, shallow depth of field."
+    audio: "Fast, labored breathing."
+
+# --- Szene 37 (1:00 - 1:05): Weiter so (Ref2V) ---
+- id: 37
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's body trembles, her breathing becoming erratic. <Picture 4> Lena's hand tightens on her back, holding her through the wave.
+    camera: "Close-up, shallow depth of field."
+    audio: "Erratic, fast breathing."
+
+# --- Szene 38 (1:05 - 1:10): Es intensiviert sich (Ref2V) ---
+- id: 38
+  type: "ref2v"
+  action: >
+    The intensity builds, <Picture 3> Kira's muscles contract, her body rigid. <Picture 4> Lena's grip is firm, unyielding.
+    camera: "Close-up, shallow depth of field."
+    audio: "Sharp, intense breathing."
+
+# --- Szene 39 (1:10 - 1:15): Kira bekommt Orgasmus (Ref2V) ---
+- id: 39
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's body convulses, a powerful orgasm rips through her. <Picture 4> Lena holds her close, a soft, tender smile on her lips.
+    camera: "Close-up, shallow depth of field."
+    audio: "Sharp gasp, then slow, fading breath."
+
+# --- Szene 40 (0:00 - 0:05): Kira fingert Lenas Vulva (Ref2V) ---
+- id: 40
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira slowly slides her index finger into <Picture 4> Lena's vulva, pressing gently, steadily. <Picture 4> Lena's body arches, a soft, high-pitched moan escapes her lips. Her fingers grip the sheet beneath her.
+    camera: "Close-up of the hand and the lower body, shallow depth of field."
+    audio: "Soft moaning, quickening breath."
+
+# --- Szene 41 (0:05 - 0:10): Kira drückt fester, Lena bebt (Ref2V) ---
+- id: 41
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's finger presses deeper and firmer into <Picture 4> Lena. <Picture 4> Lena's muscles contract, her body trembles, a sharp, gasping moan. Her hips lift involuntarily off the surface.
+    camera: "Close-up, shallow depth of field."
+    audio: "Sharp gasping, fast breathing."
+
+# --- Szene 42 (0:10 - 0:15): Kira massiert Lenas Brüste (Ref2V) ---
+- id: 42
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's other hand cups <Picture 4> Lena's large breast, squeezing and massaging it firmly, in slow, circular motions. <Picture 4> Lena's head tilts back, her eyes closed, a long, trembling sigh.
+    camera: "Close-up of the hand on the breast, shallow depth of field."
+    audio: "Long sighing, soft moaning."
+
+# --- Szene 43 (0:15 - 0:20): Kira küsst Lenas Stirn (Ref2V) ---
+- id: 43
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira leans down and presses her lips to <Picture 4> Lena's forehead, holding her close, her arms wrapping around her. <Picture 4> Lena's breathing slowly steadies, her body relaxing into the embrace.
+    camera: "Close-up of the faces, shallow depth of field."
+    audio: "Soft, steady breathing."
+
+# --- Szene 44 (0:20 - 0:25): Kira fingert wieder, Lena spannt sich (Ref2V) ---
+- id: 44
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's finger circles and presses into <Picture 4> Lena again, slow, deliberate, firm. <Picture 4> Lena's body tenses, her muscles clench, a low, guttural moan rumbles from her chest.
+    camera: "Close-up, shallow depth of field."
+    audio: "Low moaning, fast breathing."
+
+# --- Szene 45 (0:25 - 0:30): Kira drückt fester, Lena stöhnt (Ref2V) ---
+- id: 45
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira presses her finger harder and deeper into <Picture 4> Lena, grinding slowly. <Picture 4> Lena's back arches, her fingers claw at the surface, a loud, broken moan tears from her throat.
+    camera: "Close-up, shallow depth of field."
+    audio: "Loud moaning, erratic breathing."
+
+# --- Szene 46 (0:30 - 0:35): Kira massiert Lenas Brüste zärtlich (Ref2V) ---
+- id: 46
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira cradles <Picture 4> Lena's breast in her palm, massaging it with the pads of her fingers, slow, tender, unhurried. <Picture 4> Lena's eyes flutter, a soft, dazed look on her face, her breathing shallow and uneven.
+    camera: "Close-up of the hand on the breast, shallow depth of field."
+    audio: "Soft, shallow breathing."
+
+# --- Szene 47 (0:35 - 0:40): Kira fingert, Lena zuckt (Ref2V) ---
+- id: 47
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's finger works steadily, pressing and circling into <Picture 4> Lena. <Picture 4> Lena's body jerks, a sharp, involuntary shudder, her toes curl, a high, reedy moan.
+    camera: "Close-up, shallow depth of field."
+    audio: "Sharp shuddering, fast breathing."
+
+# --- Szene 48 (0:40 - 0:45): Kira massiert Lenas Brüste kräftig (Ref2V) ---
+- id: 48
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira's hand squeezes and kneads <Picture 4> Lena's breast firmly, in broad, powerful strokes. <Picture 4> Lena's head falls back, her jaw slack, a long, trembling exhale through her nose.
+    camera: "Close-up, shallow depth of field."
+    audio: "Long exhale, soft moaning."
+
+# --- Szene 49 (0:45 - 0:50): Kira küsst Lenas Wange, schmusig (Ref2V) ---
+- id: 49
+  type: "ref2v"
+  action: >
+    <Picture 3> Kira presses a slow, tender kiss to <Picture 4> Lena's cheek, her arms pulling her close, holding her tightly. <Picture 4> Lena's eyes half-close, a faint, peaceful smile, her breathing slow and deep.
+    camera: "Close-up of the faces, shallow depth of field."
+    audio: "Soft, slow breathing, gentle warmth."
