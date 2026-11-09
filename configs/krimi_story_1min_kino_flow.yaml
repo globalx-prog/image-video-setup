@@ -1,0 +1,149 @@
+# ==============================================================================
+# 🎬 1-Minuten Thriller-Drehbuch: "Midnight Exchange: Der Penthouse-Verrat"
+# ==============================================================================
+# Gesamtdauer: 60 Sekunden = Genau 12 Szenen à 5.0 Sekunden
+# Besetzung:
+#   <Picture 1> = Detective Cross (rauer Ermittler im durchnässten Trenchcoat & Fedora)
+#   <Picture 2> = Elena Vance (brillante Cyber-Infiltratorin im High-Tech Outfit)
+#
+# Regie & Szenenstruktur (Kino-Flow ohne hektischen Ping-Pong-Schnitt):
+#   - Block 1 (Szenen 1–4, 20s): Fokus Detective Cross (Ermittlung & Ankunft)
+#   - Block 2 (Szenen 5–8, 20s): Die Konfrontation (Elena am Tresor & Two-Shot Duell)
+#   - Block 3 (Szenen 9–12, 20s): Die Verfolgung & das Finale (Flucht über den Balkon)
+# ==============================================================================
+
+character_image: "ComfyUI/input/detective_cross.png"
+character2_image: "ComfyUI/input/elena_vance.png"
+
+master_style: "High-end cinematic neo-noir thriller aesthetic, 35mm Arri Alexa 65 cinematography: moody atmospheric volumetric rain and smoke, deep shadows contrasted with vibrant cyan, amber and crimson neon reflections on polished glass and wet marble, shallow depth of field, anamorphic lens flares, photorealistic skin pores, 8k textures."
+
+scenes:
+  # ============================================================================
+  # AKT 1: DER EINSTIEG & DIE ERMITTLUNG (Fokus Detective Cross)
+  # ============================================================================
+
+  # --- Szene 1 (0:00 - 0:05): Ankunft im Foyer (Ref2V) ---
+  - id: 1
+    type: "ref2v"
+    action: >
+      Establishing interior shot of a dark luxury penthouse elevator lobby. Heavy metallic elevator doors slide open with a hiss.
+      <Picture 1> is Detective Cross, a rugged middle-aged investigator in a rain-drenched dark trenchcoat and charcoal fedora tilted low.
+      He steps forward into the dim room, revolver raised at low-ready, eyes scanning the shadows.
+    camera: "Smooth dolly-out moving backwards into the hallway as the detective steps out."
+    audio: "Muffled elevator chime, hydraulic hiss of sliding doors, heavy rain drumming against exterior glass."
+
+  # --- Szene 2 (0:05 - 0:10): Spurensuche im Wohnbereich (I2V Last-Frame-Handoff) ---
+  - id: 2
+    type: "i2v"
+    action: >
+      Continuous uninterrupted forward motion: The camera tracks smoothly with Detective Cross as he moves into the expansive modern living area.
+      His wet leather boots squeak on the glossy black marble floor. He cautiously passes shattered security glass and flashing alarm panels.
+    camera: "Dynamic tracking push-in moving at eye level slightly behind and to the side of the detective."
+    audio: "Squeak of wet boots on marble, distant rolling thunder, faint high-pitched electrical whining of fried alarm sensors."
+
+  # --- Szene 3 (0:10 - 0:15): Die Tresorentdeckung (I2V Last-Frame-Handoff) ---
+  - id: 3
+    type: "i2v"
+    action: >
+      Continuous motion toward the vault: Cross halts near a massive wall safe forced wide open.
+      Electric sparks intermittently crackle along sheared titanium locking bolts. A sudden flash of lightning illuminates the empty safe interior.
+    camera: "Smooth pan and tilt down across the smoking severed locks, then tilting up to Cross's grim facial expression."
+    audio: "Crackling electrical zap, deep booming thunder vibration shaking the window panes."
+
+  # --- Szene 4 (0:15 - 0:20): Visuelle Witterung (Ref2V Close-Up) ---
+  - id: 4
+    type: "ref2v"
+    action: >
+      Intense dramatic close-up on <Picture 1> Detective Cross: Raindrops trickle down his stubbled jawline.
+      His piercing eyes narrow as he spots a silhouette lingering near the panoramic glass doors.
+      He raises his revolver firmly forward, finger tightening on the trigger.
+    camera: "Tight eye-level close-up with shallow depth of field, vivid neon reflections dancing in his eyes."
+    audio: "Sharp metallic click of the revolver hammer cocking, Cross's deep raspy voice: 'Don't move.'"
+
+  # ============================================================================
+  # AKT 2: DIE KONFRONTATION & DIE BEUTE (Elena Vance & Two-Shot)
+  # ============================================================================
+
+  # --- Szene 5 (0:20 - 0:25): Die Enthüllung der Diebin (Ref2V) ---
+  - id: 5
+    type: "ref2v"
+    action: >
+      Medium shot near the architectural glass pillar: <Picture 2> is Elena Vance, a brilliant cyber-infiltrator in a sleek high-collar dark tactical trenchcoat.
+      She holds a glowing cyan data-crystal drive in her gloved right hand.
+      She turns her head slowly toward Cross with a calm, amused smirk playing on her lips.
+    camera: "Gentle rotating arc shot circling around Elena as cyan luminescence illuminates her cheekbones."
+    audio: "High-pitched digital resonance from the glowing crystal drive, soft feminine chuckle."
+
+  # --- Szene 6 (0:25 - 0:30): Das Duell im Neonlicht (Ref2V Two-Shot Master) ---
+  - id: 6
+    type: "ref2v"
+    action: >
+      Cinematic two-shot across the spacious marble salon:
+      On the left, <Picture 1> Detective Cross stands resolute in his soaked coat aiming his weapon.
+      On the right, <Picture 2> Elena Vance stands poised and relaxed beside the glass facade.
+      The metropolis skyline blazes with cyan and amber holographic billboards behind the streaming rain.
+    camera: "Wide stationary cinematic master shot with dramatic chiaroscuro silhouette lighting."
+    audio: "Howling wind battering the glass exterior, muffled distant police sirens sixty floors below."
+
+  # --- Szene 7 (0:30 - 0:35): Die Verhandlung (I2V Dialogsequenz) ---
+  - id: 7
+    type: "i2v"
+    action: >
+      Subtle continuous dialogue motion: Elena takes a slow half-step backward toward the balcony door.
+      She speaks calmly with steady eye contact: 'You're too late, Detective. The truth is already uploaded.'
+      Cross stands his ground, muscles coiled for action.
+    camera: "Slow cinematic push-in tightening the framing on both characters."
+    audio: "Elena's clear, confident voice, background rain intensity swelling, low synth bass drone."
+
+  # --- Szene 8 (0:35 - 0:40): Die Finte (I2V Dynamischer Wurf) ---
+  - id: 8
+    type: "i2v"
+    action: >
+      Sudden explosive action: Elena drops low and whips the glowing crystal drive across the glossy floor straight toward Cross.
+      The glowing drive leaves a trail of cyan reflections as it spins across the wet marble.
+      Simultaneously, Elena turns and sprints for the balcony.
+    camera: "Fast dynamic low-angle whip-tracking shot following the spinning glowing drive across the floor."
+    audio: "Zipping friction sound of the crystal skimming across marble, hurried combat boot steps, sudden gust of wind."
+
+  # ============================================================================
+  # AKT 3: DIE VERFOLGUNG & DAS FINALE (Balkon-Flucht)
+  # ============================================================================
+
+  # --- Szene 9 (0:40 - 0:45): Der Fang des Detektivs (Ref2V) ---
+  - id: 9
+    type: "ref2v"
+    action: >
+      Dynamic cut: <Picture 1> Detective Cross drops to one knee and snatches the spinning crystal drive with his gloved left hand.
+      The blue luminescence flares across his face as his gaze snaps upward toward the balcony doors in sudden realization.
+    camera: "Dynamic snap zoom in on the detective's hand clutching the drive, then tilting up to his determined face."
+    audio: "Solid thud of the crystal striking leather glove, sharp gasp of breath, sudden thunderclap."
+
+  # --- Szene 10 (0:45 - 0:50): Sturm auf dem Balkon (Ref2V) ---
+  - id: 10
+    type: "ref2v"
+    action: >
+      Exterior penthouse terrace shot: Torrential rain and howling wind whip across the wide rooftop veranda.
+      <Picture 2> Elena Vance sprints to the outer glass balustrade, trenchcoat flapping violently in the storm.
+      She reaches the ledge, stands atop the railing overlooking the neon abyss of the city.
+    camera: "Wide dramatic low-angle shot looking up at Elena standing heroic against the storm and city skyline."
+    audio: "Roaring thunderstorm, deafening torrents of rain, whipping fabric in high-altitude gale wind."
+
+  # --- Szene 11 (0:50 - 0:55): Der Sprung in die Tiefe (I2V Last-Frame-Handoff) ---
+  - id: 11
+    type: "i2v"
+    action: >
+      Continuous vertigo motion: Elena leaps boldly off the balcony into the open night air.
+      She deploys a sleek micro-glider parachute wing that catches the air drafts as she dives down between the glowing towers.
+    camera: "Dramatic crane tracking shot diving down with her as she glides between skyscraper canyon walls."
+    audio: "Deep air displacement whoosh, snap of carbon-fiber glider wing deploying, fading into the city roar."
+
+  # --- Szene 12 (0:55 - 1:00): Der Epilog an der Brüstung (Ref2V Finale) ---
+  - id: 12
+    type: "ref2v"
+    action: >
+      Closing cinematic shot: <Picture 1> Detective Cross bursts through the terrace doors, reaching the railing breathless.
+      Rain pours over his brimmed fedora as he looks down into the neon fog where Elena vanished.
+      He raises the glowing cyan drive in his hand, a wry, begrudging half-smile appearing on his weathered face.
+    camera: "Slow cinematic pull-back crane shot ascending into the rain and neon clouds as the screen fades to black."
+    audio: "Surging film-noir brass melody and melancholy jazz horn, fading rain, distant echo of sirens. End of movie."
+

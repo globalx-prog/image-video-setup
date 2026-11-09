@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  comfyui:
+    # Wir nutzen das offizielle AMD ROCm Image mit PyTorch
+    image: rocm/pytorch:latest
+    container_name: comfyui_rocm
+    restart: unless-stopped
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    ports:
+      - "8188:8188"
+    volumes:
+      # Hier werden ComfyUI und die Modelle auf dem Host gespeichert, 
+      # damit sie bei einem Container-Neustart nicht verloren gehen.
+      - ./comfy_data:/app
+    group_add:
+      - video
+    # Beim Start prüft der Container ob ComfyUI existiert. 
+    # Wenn nicht, wird es runtergeladen. Dann werden Abhängigkeiten installiert und der Server gestartet.
+    command: >
+      bash -c "if [ ! -d '/app/ComfyUI' ]; then 
+        git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI; 
+      fi && 
+      cd /app/ComfyUI && 
+      pip install -r requirements.txt && 
+      python main.py --listen 0.0.0.0"

@@ -1,0 +1,26 @@
+# ==============================================================================
+# 🎬 WAN 2.2 Test-Drehbuch: Die Turmuhr-Werkstatt (15s)
+# ==============================================================================
+# WAN 2.2 ist rein bild- und bewegungsbasiert.
+# Die Audio-Spur wird automatisch aus den 'audio'-Feldern per FFmpeg gemuxt!
+# ==============================================================================
+
+character_image: "ComfyUI/input/steampunk_mechanic_fox.png"
+style: "Cinematic dieselpunk fantasy look, 35mm practical film photography: moody atmospheric volumetric fog, warm brass lantern light, anamorphic lens flare, tactile brass textures, rich cinematic contrast."
+
+scenes:
+  - id: 1
+    type: "i2v"
+    action: "Dusty interior of a massive Victorian clock tower with rotating brass cogs. A clever red fox in a leather mechanic apron balances along a wooden beam, looking down at a jammed gear. Dynamic camera crane shot slowly descending."
+    audio: "heavy rhythmic clock ticking, deep mechanical clanking, whistling wind"
+
+  - id: 2
+    type: "i2v"
+    action: "Continuous tracking motion: The fox touches the oil can to the jammed gear. The massive bronze cogs jolt into smooth, rapid rotation with tiny sparks. Camera smoothly pushes in closer alongside the fox."
+    audio: "crisp mechanical click, hiss of escaping steam, resonant chime of released tension"
+
+  - id: 3
+    type: "i2v"
+    action: "Hero close-up: The fox mechanic leans against a brass railing, wiping grease from its cheek, proudly looking out through the giant clock face over the misty city."
+    audio: "grand church bell tolling across the city, quiet steady hum of gears, orchestral chord"
+

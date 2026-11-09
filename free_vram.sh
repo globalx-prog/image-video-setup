@@ -1,0 +1,1 @@
+scripts/free_vram.sh

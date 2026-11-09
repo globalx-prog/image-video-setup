@@ -1,0 +1,75 @@
+# ==============================================================================
+# 🎬 UNIVERSAL-TEMPLATE: KI-Film Drehbuch (Stil-, Format- & Struktur-Vorlage)
+# ==============================================================================
+# Dieses Template demonstriert die 4 essenziellen Grundbausteine eines KI-Films:
+#   1. Solo-Szene für Charakter 1 (<Picture 1> isoliert -> 0% Attention-Bleed)
+#   2. Solo-Szene für Charakter 2 (<Picture 2> isoliert -> 0% Attention-Bleed)
+#   3. Two-Shot / Gruppen-Szene (Beide Charaktere gleichzeitig im Bild)
+#   4. Kausale Aktions-Fortführung (Ursache -> Wirkung ohne Aktions-Schleifen)
+#
+# Jede Szene dauert exakt 5.0 Sekunden (120/121 Frames bei 24 fps).
+# Beliebig viele Szenen können nach diesem Muster angehängt werden.
+# ==============================================================================
+
+# Pfade zu den Master-Porträts (im ComfyUI/input Ordner)
+character_image: "ComfyUI/input/charakter1.png"
+character2_image: "ComfyUI/input/charakter2.png"
+
+# ==============================================================================
+# 🌟 MASTER-STIL & VISUELLER ANKER (Wird automatisch jeder Szene vorangestellt)
+# ==============================================================================
+master_style: >-
+  Master Cinematic Look: High-end cinematic aesthetic, shot on 35mm Arri Alexa 65 anamorphic lenses (2.39:1 widescreen frame), shallow depth of field, natural motion blur, authentic 35mm film grain.
+  Atmosphere & Lighting: Volumetric atmospheric lighting, high-contrast chiaroscuro shadows contrasted with vibrant environmental reflections, cinematic color grading.
+  Character Fidelity & Anatomy: Exact photorealistic facial and wardrobe replication from reference images (<Picture 1> [Visuelle Merkmale Figur 1], <Picture 2> [Visuelle Merkmale Figur 2]).
+  Temporal Progression: Every shot advances forward in time without looping or repeating actions.
+
+# ==============================================================================
+# 🎞️ SZENEN-BAUSTEINE
+# ==============================================================================
+scenes:
+  # --- Baustein 1: Solo-Szene Charakter 1 (Auftakt / Fokus auf Figur 1) ---
+  - id: 1
+    type: "ref2v"
+    visible_characters:
+      - "Name Figur 1 (<Picture 1>)"
+    action: >-
+      Medium establishing shot: <Picture 1> is [Name/Rolle Figur 1, z.B. Forscher im Schutzanzug].
+      [Physische Handlung: bewegt sich durch die Szenerie, scannt die Umgebung, Mimik und Haltung].
+    camera: "Smooth slow dolly-out moving steadily backwards as the character advances."
+    audio: "[Foley-Schritte, Raumakustik, spezifische Umgebungsgeräusche, dezenter Musik-Auftakt]."
+
+  # --- Baustein 2: Solo-Szene Charakter 2 (Gegenschnitt / Reveal von Figur 2) ---
+  - id: 2
+    type: "ref2v"
+    visible_characters:
+      - "Name Figur 2 (<Picture 2>)"
+    action: >-
+      Reverse-angle medium shot: <Picture 2> is [Name/Rolle Figur 2, z.B. Pilotin im Hightech-Outfit].
+      [Aktion: interagiert mit einer Requisite, blickt auf und bemerkt die Annäherung, Mimik].
+    camera: "Dynamic rotating arc shot circling smoothly around the character."
+    audio: "[Requisiten-Klang, veränderte Raumakustik, anschwellende Grundstimmung]."
+
+  # --- Baustein 3: Two-Shot (Beide Charaktere gleichzeitig im Bild) ---
+  - id: 3
+    type: "ref2v"
+    visible_characters:
+      - "Name Figur 1 (<Picture 1>)"
+      - "Name Figur 2 (<Picture 2>)"
+    action: >-
+      Wide cinematic two-shot across [Ort/Raum]:
+      On the left, <Picture 1> [Haltung, Position im Bild].
+      On the right, <Picture 2> [Haltung, Position im Bild].
+      [Spannungsgeladene Interaktion oder Dialog zwischen beiden Figuren].
+    camera: "Wide stationary cinematic master shot with deep anamorphic field and dramatic lighting."
+    audio: "[Dialogzeile oder bedeutungsvolle Stille, atmosphärischer Wind/Hintergrund, Bass-Spannung]."
+
+  # --- Baustein 4: Kausale Aktion & Weiterführung (Ursache -> Wirkung) ---
+  - id: 4
+    type: "ref2v"
+    visible_characters:
+      - "Name Figur 1 (<Picture 1>)"
+    action: >-
+      Dynamic reaction shot: <Picture 1> [führt die Handlung aus Szene 3 kausal fort: reagiert auf den Impuls, greift nach einer Requisite oder weicht aus, OHNE die vorige Bewegung zu wiederholen].
+    camera: "Kinetic tracking push-in focusing on the character's immediate reaction."
+    audio: "[Wuchtiger Foley-Einschlag, rasche Bewegung, orchestraler Höhepunkt]."
